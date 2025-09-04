@@ -28,9 +28,7 @@ const nextConfig: NextConfig = {
     ];
   },
   // Enable experimental features for better CORS handling
-  experimental: {
-    serverComponentsExternalPackages: [],
-  },
+  serverExternalPackages: [],
 };
 
 export default nextConfig;

@@ -159,7 +159,7 @@ export default function ExampleProtectedPage() {
                 <Card className="border-green-200 bg-green-50">
                   <CardContent className="pt-4">
                     <p className="text-sm text-green-800">
-                      This card is visible if you have either 'view_customers' OR 'view_leads' permission
+                      This card is visible if you have either &apos;view_customers&apos; OR &apos;view_leads&apos; permission
                     </p>
                   </CardContent>
                 </Card>
@@ -170,7 +170,7 @@ export default function ExampleProtectedPage() {
                 <Card className="border-blue-200 bg-blue-50">
                   <CardContent className="pt-4">
                     <p className="text-sm text-blue-800">
-                      This card is visible if you have BOTH 'view_employees' AND 'edit_employees' permissions
+                      This card is visible if you have BOTH &apos;view_employees&apos; AND &apos;edit_employees&apos; permissions
                     </p>
                   </CardContent>
                 </Card>

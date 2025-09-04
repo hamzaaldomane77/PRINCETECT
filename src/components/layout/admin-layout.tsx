@@ -95,12 +95,14 @@ export function AdminLayout({ children }: AdminLayoutProps) {
     }
   };
 
-  if (!user) {
-    // Redirect to login page if no user
-    useEffect(() => {
+  // Redirect to login page if no user
+  useEffect(() => {
+    if (!user) {
       router.push('/');
-    }, [router]);
-    
+    }
+  }, [user, router]);
+
+  if (!user) {
     return (
       <div className="min-h-screen bg-gray-100 dark:bg-gray-900 flex items-center justify-center">
         <div className="text-center">

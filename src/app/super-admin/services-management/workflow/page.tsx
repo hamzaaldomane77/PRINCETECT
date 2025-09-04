@@ -284,7 +284,7 @@ export default function WorkflowPage() {
             <AlertDialogHeader>
               <AlertDialogTitle>Delete Workflow</AlertDialogTitle>
               <AlertDialogDescription>
-                Are you sure you want to delete the workflow "{workflowToDelete?.name}"? 
+                Are you sure you want to delete the workflow &quot;{workflowToDelete?.name}&quot;? 
                 <br />
                 <span className="text-red-600 font-medium">This action cannot be undone.</span>
               </AlertDialogDescription>

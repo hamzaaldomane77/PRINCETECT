@@ -305,7 +305,7 @@ export default function CitiesPage() {
             <AlertDialogHeader>
               <AlertDialogTitle>Confirm Deletion</AlertDialogTitle>
               <AlertDialogDescription>
-                Are you sure you want to delete the city "{cityToDelete?.name}"? 
+                Are you sure you want to delete the city &quot;{cityToDelete?.name}&quot;? 
                 <br />
                 <span className="text-red-600 font-medium">This action cannot be undone.</span>
               </AlertDialogDescription>

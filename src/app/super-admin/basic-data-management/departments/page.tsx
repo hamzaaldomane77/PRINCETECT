@@ -306,7 +306,7 @@ export default function DepartmentsPage() {
             <AlertDialogHeader>
               <AlertDialogTitle>Confirm Deletion</AlertDialogTitle>
               <AlertDialogDescription>
-                Are you sure you want to delete the department "{departmentToDelete?.name}"? 
+                Are you sure you want to delete the department &quot;{departmentToDelete?.name}&quot;? 
                 <br />
                 <span className="text-red-600 font-medium">This action cannot be undone.</span>
               </AlertDialogDescription>

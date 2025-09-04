@@ -19,7 +19,7 @@ export default function UnauthorizedPage() {
             Access Denied
           </CardTitle>
           <CardDescription className="text-gray-600 dark:text-gray-400">
-            You don't have permission to access this page. Please contact your administrator if you believe this is an error.
+            You don&apos;t have permission to access this page. Please contact your administrator if you believe this is an error.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">

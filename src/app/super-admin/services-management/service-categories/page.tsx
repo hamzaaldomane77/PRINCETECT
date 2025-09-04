@@ -306,7 +306,7 @@ export default function ServiceCategoriesPage() {
             <AlertDialogHeader>
               <AlertDialogTitle>Confirm Deletion</AlertDialogTitle>
               <AlertDialogDescription>
-                Are you sure you want to delete the category "{categoryToDelete?.name}"? 
+                Are you sure you want to delete the category &quot;{categoryToDelete?.name}&quot;? 
                 <br />
                 <span className="text-red-600 font-medium">This action cannot be undone.</span>
               </AlertDialogDescription>

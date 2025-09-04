@@ -311,7 +311,7 @@ export default function ServicesPage() {
             <AlertDialogHeader>
               <AlertDialogTitle>تأكيد الحذف</AlertDialogTitle>
               <AlertDialogDescription>
-                هل أنت متأكد من أنك تريد حذف الخدمة "{serviceToDelete?.name}"؟ 
+                هل أنت متأكد من أنك تريد حذف الخدمة &quot;{serviceToDelete?.name}&quot;؟ 
                 <br />
                 <span className="text-red-600 font-medium">هذا الإجراء لا يمكن التراجع عنه.</span>
               </AlertDialogDescription>
