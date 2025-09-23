@@ -54,7 +54,7 @@ export class ServiceWorkflowsAPI {
   }
 
   static async updateServiceWorkflow(id: number, data: UpdateServiceWorkflowRequest): Promise<ServiceWorkflow> {
-    const result = await apiClient.put<any>(`${API_BASE}/${id}`, data);
+    const result = await apiClient.put<{ success: boolean; data: ServiceWorkflow }>(`${API_BASE}/${id}`, data);
     if (!result.success) {
       throw new Error('Failed to update service workflow');
     }
@@ -62,7 +62,7 @@ export class ServiceWorkflowsAPI {
   }
 
   static async deleteServiceWorkflow(id: number): Promise<void> {
-    const result = await apiClient.delete<any>(`${API_BASE}/${id}`);
+    const result = await apiClient.delete<{ success: boolean }>(`${API_BASE}/${id}`);
     if (!result.success) {
       throw new Error('Failed to delete service workflow');
     }

@@ -36,15 +36,37 @@ export class ApiClient {
   }
   
   // Generic POST request
-  async post<T>(endpoint: string, data?: any, options?: RequestInit): Promise<T> {
+  async post<T>(endpoint: string, data?: Record<string, unknown> | FormData, options?: RequestInit): Promise<T> {
     const url = `${this.baseURL}${endpoint}`;
-    const headers = this.getAuthHeaders();
+    const defaultHeaders = this.getAuthHeaders();
+    
+    // Handle FormData vs JSON
+    let body: BodyInit | undefined;
+    let headers: HeadersInit;
+    
+    if (data instanceof FormData) {
+      body = data;
+      // For FormData, merge headers but don't set Content-Type (let browser set it with boundary)
+      headers = {
+        ...defaultHeaders,
+        ...options?.headers,
+      };
+      // Remove Content-Type for FormData to let browser set it properly
+      delete (headers as any)['Content-Type'];
+    } else {
+      body = data ? JSON.stringify(data) : undefined;
+      // For JSON, merge headers including Content-Type
+      headers = {
+        ...defaultHeaders,
+        ...options?.headers,
+      };
+    }
     
     const response = await fetch(url, {
       method: 'POST',
-      headers,
-      body: data ? JSON.stringify(data) : undefined,
+      body,
       ...options,
+      headers, // Ensure our merged headers take precedence
     });
     
     if (!response.ok) {
@@ -55,15 +77,34 @@ export class ApiClient {
   }
   
   // Generic PUT request
-  async put<T>(endpoint: string, data?: any, options?: RequestInit): Promise<T> {
+  async put<T>(endpoint: string, data?: Record<string, unknown> | FormData, options?: RequestInit): Promise<T> {
     const url = `${this.baseURL}${endpoint}`;
-    const headers = this.getAuthHeaders();
+    const defaultHeaders = this.getAuthHeaders();
+    
+    // Handle FormData vs JSON
+    let body: BodyInit | undefined;
+    let headers: HeadersInit;
+    
+    if (data instanceof FormData) {
+      body = data;
+      headers = {
+        ...defaultHeaders,
+        ...options?.headers,
+      };
+      delete (headers as any)['Content-Type'];
+    } else {
+      body = data ? JSON.stringify(data) : undefined;
+      headers = {
+        ...defaultHeaders,
+        ...options?.headers,
+      };
+    }
     
     const response = await fetch(url, {
       method: 'PUT',
-      headers,
-      body: data ? JSON.stringify(data) : undefined,
+      body,
       ...options,
+      headers,
     });
     
     if (!response.ok) {
@@ -74,15 +115,34 @@ export class ApiClient {
   }
   
   // Generic PATCH request
-  async patch<T>(endpoint: string, data?: any, options?: RequestInit): Promise<T> {
+  async patch<T>(endpoint: string, data?: Record<string, unknown> | FormData, options?: RequestInit): Promise<T> {
     const url = `${this.baseURL}${endpoint}`;
-    const headers = this.getAuthHeaders();
+    const defaultHeaders = this.getAuthHeaders();
+    
+    // Handle FormData vs JSON
+    let body: BodyInit | undefined;
+    let headers: HeadersInit;
+    
+    if (data instanceof FormData) {
+      body = data;
+      headers = {
+        ...defaultHeaders,
+        ...options?.headers,
+      };
+      delete (headers as any)['Content-Type'];
+    } else {
+      body = data ? JSON.stringify(data) : undefined;
+      headers = {
+        ...defaultHeaders,
+        ...options?.headers,
+      };
+    }
     
     const response = await fetch(url, {
       method: 'PATCH',
-      headers,
-      body: data ? JSON.stringify(data) : undefined,
+      body,
       ...options,
+      headers,
     });
     
     if (!response.ok) {
@@ -95,11 +155,43 @@ export class ApiClient {
   // Generic DELETE request
   async delete<T>(endpoint: string, options?: RequestInit): Promise<T> {
     const url = `${this.baseURL}${endpoint}`;
-    const headers = this.getAuthHeaders();
+    const defaultHeaders = this.getAuthHeaders();
+    
+    // Merge headers
+    const headers = {
+      ...defaultHeaders,
+      ...options?.headers,
+    };
     
     const response = await fetch(url, {
       method: 'DELETE',
+      ...options,
       headers,
+    });
+    
+    if (!response.ok) {
+      await this.handleError(response);
+    }
+    
+    return response.json();
+  }
+
+  // POST request specifically for FormData
+  async postFormData<T>(endpoint: string, formData: FormData, options?: RequestInit): Promise<T> {
+    const url = `${this.baseURL}${endpoint}`;
+    const token = localStorage.getItem('auth-token');
+    
+    const headers: HeadersInit = {
+      'Accept': 'application/json',
+      ...(token && { 'Authorization': `Bearer ${token}` }),
+      ...options?.headers,
+    };
+    // Don't set Content-Type for FormData - let browser set it with boundary
+    
+    const response = await fetch(url, {
+      method: 'POST',
+      headers,
+      body: formData,
       ...options,
     });
     
@@ -112,10 +204,11 @@ export class ApiClient {
   
   // Handle API errors
   private async handleError(response: Response): Promise<never> {
+    let errorData: any = null;
     let errorMessage = 'An error occurred';
     
     try {
-      const errorData = await response.json();
+      errorData = await response.json();
       errorMessage = errorData.message || errorData.error || errorMessage;
     } catch {
       // If we can't parse the error response, use status text
@@ -123,6 +216,17 @@ export class ApiClient {
     }
     
     console.error(`API Error ${response.status}:`, errorMessage);
+    console.log('Full error data:', errorData);
+    
+    // Create error object that preserves original response data
+    const error = new Error(errorMessage) as any;
+    error.status = response.status;
+    error.statusText = response.statusText;
+    error.response = {
+      status: response.status,
+      statusText: response.statusText,
+      data: errorData
+    };
     
     // Handle specific HTTP status codes
     switch (response.status) {
@@ -131,23 +235,31 @@ export class ApiClient {
         localStorage.removeItem('auth-token');
         localStorage.removeItem('auth-user');
         window.location.href = '/';
-        throw new Error('Authentication required. Please log in.');
+        error.message = 'Authentication required. Please log in.';
+        break;
         
       case 403:
-        throw new Error('Access denied. Insufficient permissions.');
+        error.message = 'Access denied. Insufficient permissions.';
+        break;
         
       case 404:
-        throw new Error('API endpoint not found. Please check the URL.');
+        error.message = 'API endpoint not found. Please check the URL.';
+        break;
         
       case 422:
-        throw new Error(`Validation failed: ${errorMessage}`);
+        // For validation errors, keep the original message and data
+        error.message = errorMessage;
+        break;
         
       case 500:
-        throw new Error('Server error. Please try again later.');
+        error.message = 'Server error. Please try again later.';
+        break;
         
       default:
-        throw new Error(`Request failed: ${response.status} ${errorMessage}`);
+        error.message = `Request failed: ${response.status} ${errorMessage}`;
     }
+    
+    throw error;
   }
   
   // Check if user is authenticated

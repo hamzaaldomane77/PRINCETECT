@@ -9,10 +9,12 @@ import { useAuth } from '@/contexts/auth-context';
 import { LoginCredentials } from '@/types/auth';
 import Image from 'next/image';
 import toast, { Toaster } from 'react-hot-toast';
+import { EyeIcon, EyeOffIcon } from '@/components/ui/icons';
 
 export default function LoginForm() {
   const [credentials, setCredentials] = useState<LoginCredentials>({ email: '', password: '' });
   const [error, setError] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
 
   const { login, isLoading, isAuthenticated, user } = useAuth();
   const router = useRouter();
@@ -143,16 +145,30 @@ export default function LoginForm() {
                 <Label htmlFor="password" className="text-gray-700 dark:text-gray-300">
                   كلمة المرور
                 </Label>
-                <input
-                  id="password"
-                  type="password"
-                  value={credentials.password}
-                  onChange={(e) => handleInputChange('password', e.target.value)}
-                  className="mt-1 w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 dark:bg-gray-800 dark:text-white"
-                  placeholder="أدخل كلمة المرور"
-                  required
-                  disabled={isLoading}
-                />
+                <div className="relative">
+                  <input
+                    id="password"
+                    type={showPassword ? "text" : "password"}
+                    value={credentials.password}
+                    onChange={(e) => handleInputChange('password', e.target.value)}
+                    className="mt-1 w-full px-3 py-2 pr-10 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 dark:bg-gray-800 dark:text-white"
+                    placeholder="أدخل كلمة المرور"
+                    required
+                    disabled={isLoading}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300"
+                    disabled={isLoading}
+                  >
+                    {showPassword ? (
+                      <EyeOffIcon className="h-4 w-4" />
+                    ) : (
+                      <EyeIcon className="h-4 w-4" />
+                    )}
+                  </button>
+                </div>
               </div>
 
               <Button

@@ -59,5 +59,5 @@ export interface WorkflowTaskLookupResponse {
       label: string;
     }>;
   };
-  meta: {};
+  meta: Record<string, unknown>;
 }

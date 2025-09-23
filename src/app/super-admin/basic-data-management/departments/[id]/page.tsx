@@ -341,7 +341,7 @@ export default function DepartmentDetailsPage() {
             <AlertDialogHeader>
               <AlertDialogTitle>Delete Department</AlertDialogTitle>
               <AlertDialogDescription>
-                Are you sure you want to delete "{currentDepartment.name}"? This action cannot be undone.
+                Are you sure you want to delete &quot;{currentDepartment.name}&quot;? This action cannot be undone.
                 All associated data with this department will be permanently removed.
               </AlertDialogDescription>
             </AlertDialogHeader>

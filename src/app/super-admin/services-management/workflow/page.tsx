@@ -216,7 +216,7 @@ export default function WorkflowPage() {
                     </h3>
                     <div className="mt-2 text-sm text-blue-700 dark:text-blue-300">
                       <p>
-                        Task management is now available! Click "View Tasks" to see and manage tasks for each workflow. 
+                        Task management is now available! Click &quot;View Tasks&quot; to see and manage tasks for each workflow. 
                         Tasks are loaded with workflow details and can be filtered and searched locally.
                       </p>
                     </div>

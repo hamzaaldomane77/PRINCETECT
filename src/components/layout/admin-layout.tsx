@@ -31,8 +31,8 @@ export function AdminLayout({ children }: AdminLayoutProps) {
         // Handle nested routes
         const routeParts = route.split('/');
         if (routeParts.length >= 2) {
-          // For nested routes like customer-management/customers
-          pageId = routeParts[1]; // Get the last part (customers, employees, etc.)
+          // For nested routes like clients-management/clients
+          pageId = routeParts[1]; // Get the last part (clients, employees, etc.)
         } else {
           pageId = route;
         }
@@ -48,23 +48,23 @@ export function AdminLayout({ children }: AdminLayoutProps) {
       case 'dashboard':
         router.push('/super-admin');
         break;
-      case 'customers':
-        router.push('/super-admin/customer-management/customers');
+      case 'clients':
+        router.push('/super-admin/clients-management/clients');
         break;
-      case 'potential-customers':
-        router.push('/super-admin/customer-management/potential-customers');
+      case 'potential-clients':
+        router.push('/super-admin/clients-management/potential-clients');
         break;
       case 'meetings':
-        router.push('/super-admin/customer-management/meetings');
+        router.push('/super-admin/clients-management/meetings');
         break;
       case 'offers':
-        router.push('/super-admin/customer-management/offers');
+        router.push('/super-admin/clients-management/offers');
         break;
-      case 'active-customers':
-        router.push('/super-admin/customer-management/active-customers');
+      case 'active-clients':
+        router.push('/super-admin/clients-management/active-clients');
         break;
       case 'contracts':
-        router.push('/super-admin/customer-management/contracts');
+        router.push('/super-admin/clients-management/contracts');
         break;
       case 'employee-types':
         router.push('/super-admin/employee-management/employee-types');

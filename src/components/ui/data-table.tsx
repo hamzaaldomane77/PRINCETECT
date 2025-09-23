@@ -44,6 +44,14 @@ export interface DataTableProps {
   onSelectionChange?: (selectedIds: number[]) => void
   onSearch?: (query: string) => void
   onFilter?: () => void
+  // Server-side pagination props
+  serverSide?: boolean
+  currentPage?: number
+  totalPages?: number
+  totalItems?: number
+  itemsPerPage?: number
+  onPageChange?: (page: number) => void
+  onItemsPerPageChange?: (itemsPerPage: number) => void
 }
 
 export function DataTable({
@@ -55,35 +63,49 @@ export function DataTable({
   filterable = true,
   selectable = true,
   pagination = true,
-  itemsPerPageOptions = [5, 10, 20, 50],
+  itemsPerPageOptions = [5, 10, 15],
   defaultItemsPerPage = 5,
   className,
   tableClassName,
   onSelectionChange,
   onSearch,
-  onFilter
+  onFilter,
+  // Server-side pagination props
+  serverSide = false,
+  currentPage: serverCurrentPage,
+  totalPages: serverTotalPages,
+  totalItems: serverTotalItems,
+  itemsPerPage: serverItemsPerPage,
+  onPageChange,
+  onItemsPerPageChange
 }: DataTableProps) {
   const [searchQuery, setSearchQuery]  = React.useState('')
   const [currentPage, setCurrentPage] = React.useState(1)
   const [itemsPerPage, setItemsPerPage] = React.useState(defaultItemsPerPage)
   const [selectedRows, setSelectedRows] = React.useState<number[]>([])
 
-  // Filter data based on search query
+  // Use server-side values if available, otherwise use local state
+  const effectiveCurrentPage = serverSide ? (serverCurrentPage || 1) : currentPage
+  const effectiveItemsPerPage = serverSide ? (serverItemsPerPage || defaultItemsPerPage) : itemsPerPage
+  const effectiveTotalPages = serverSide ? (serverTotalPages || 1) : Math.ceil(data.length / effectiveItemsPerPage)
+  const effectiveTotalItems = serverSide ? (serverTotalItems || data.length) : data.length
+
+  // Filter data based on search query (only for client-side)
   const filteredData = React.useMemo(() => {
+    if (serverSide) return data // Server handles filtering
     if (!searchQuery) return data
     return data.filter(item =>
       Object.values(item).some(value =>
         String(value).toLowerCase().includes(searchQuery.toLowerCase())
       )
     )
-  }, [data, searchQuery])
+  }, [data, searchQuery, serverSide])
 
   // Calculate pagination
-  const totalItems = filteredData.length
-  const totalPages = Math.ceil(totalItems / itemsPerPage)
-  const startIndex = (currentPage - 1) * itemsPerPage
-  const endIndex = startIndex + itemsPerPage
-  const currentData = filteredData.slice(startIndex, endIndex)
+  const currentData = serverSide ? data : filteredData.slice(
+    (effectiveCurrentPage - 1) * effectiveItemsPerPage,
+    effectiveCurrentPage * effectiveItemsPerPage
+  )
 
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
@@ -110,6 +132,23 @@ export function DataTable({
   const handleSearch = (query: string) => {
     setSearchQuery(query)
     onSearch?.(query)
+  }
+
+  const handlePageChange = (page: number) => {
+    if (serverSide) {
+      onPageChange?.(page)
+    } else {
+      setCurrentPage(page)
+    }
+  }
+
+  const handleItemsPerPageChange = (newItemsPerPage: number) => {
+    if (serverSide) {
+      onItemsPerPageChange?.(newItemsPerPage)
+    } else {
+      setItemsPerPage(newItemsPerPage)
+      setCurrentPage(1)
+    }
   }
 
   const formatDate = (dateString: string) => {
@@ -292,15 +331,12 @@ export function DataTable({
         {/* Pagination */}
         {pagination && (
           <Pagination
-            currentPage={currentPage}
-            totalPages={totalPages}
-            totalItems={totalItems}
-            itemsPerPage={itemsPerPage}
-            onPageChange={setCurrentPage}
-            onItemsPerPageChange={(newItemsPerPage) => {
-              setItemsPerPage(newItemsPerPage)
-              setCurrentPage(1)
-            }}
+            currentPage={effectiveCurrentPage}
+            totalPages={effectiveTotalPages}
+            totalItems={effectiveTotalItems}
+            itemsPerPage={effectiveItemsPerPage}
+            onPageChange={handlePageChange}
+            onItemsPerPageChange={handleItemsPerPageChange}
             className="border-t border-gray-200 dark:border-gray-700 flex-shrink-0"
           />
         )}

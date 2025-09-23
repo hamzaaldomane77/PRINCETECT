@@ -12,7 +12,7 @@ export interface LookupResponse {
   data: {
     options: LookupOption[];
   };
-  meta: any;
+  meta: Record<string, unknown>;
 }
 
 export class ServicesLookupAPI {

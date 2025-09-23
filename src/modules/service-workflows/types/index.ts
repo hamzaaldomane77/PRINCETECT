@@ -73,5 +73,5 @@ export interface ServiceWorkflowLookupResponse {
       label: string;
     }>;
   };
-  meta: any;
+  meta: Record<string, unknown>;
 }

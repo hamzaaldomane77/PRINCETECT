@@ -36,7 +36,7 @@ export interface DashboardOverview {
 export interface DashboardResponse {
   success: boolean;
   data: DashboardOverview;
-  meta: any;
+  meta: Record<string, unknown>;
 }
 
 export class DashboardAPI {

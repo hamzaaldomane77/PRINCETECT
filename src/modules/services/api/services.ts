@@ -27,7 +27,7 @@ export class ServicesAPI {
 
   // Get service by ID
   static async getServiceById(id: number): Promise<Service> {
-    const result = await apiClient.get<any>(`${API_BASE}/${id}`);
+    const result = await apiClient.get<{ success: boolean; data: { service: Service } }>(`${API_BASE}/${id}`);
     
     if (!result.success) {
       throw new Error('Failed to fetch service');
@@ -38,7 +38,7 @@ export class ServicesAPI {
 
   // Create new service
   static async createService(data: CreateServiceRequest): Promise<Service> {
-    const result = await apiClient.post<any>(API_BASE, data);
+    const result = await apiClient.post<{ success: boolean; data: { service: Service } }>(API_BASE, data);
     
     if (!result.success) {
       throw new Error('Failed to create service');
@@ -49,7 +49,7 @@ export class ServicesAPI {
 
   // Update service
   static async updateService(id: number, data: UpdateServiceRequest): Promise<Service> {
-    const result = await apiClient.put<any>(`${API_BASE}/${id}`, data);
+    const result = await apiClient.put<{ success: boolean; data: { service: Service } }>(`${API_BASE}/${id}`, data);
     
     if (!result.success) {
       throw new Error('Failed to update service');
@@ -60,7 +60,7 @@ export class ServicesAPI {
 
   // Delete service
   static async deleteService(id: number): Promise<void> {
-    const result = await apiClient.post<any>(`${API_BASE}/${id}`);
+    const result = await apiClient.post<{ success: boolean }>(`${API_BASE}/${id}`);
     
     if (!result.success) {
       throw new Error('Failed to delete service');
@@ -69,7 +69,7 @@ export class ServicesAPI {
 
   // Toggle service status
   static async toggleServiceStatus(id: number): Promise<Service> {
-    const result = await apiClient.patch<any>(`${API_BASE}/${id}/toggle-status`);
+    const result = await apiClient.patch<{ success: boolean; data: { service: Service } }>(`${API_BASE}/${id}/toggle-status`);
     
     if (!result.success) {
       throw new Error('Failed to toggle service status');

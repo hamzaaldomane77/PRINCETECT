@@ -35,7 +35,7 @@ export interface LoginResponse {
     token_type: string;
     user: User;
   };
-  meta: any;
+  meta: Record<string, unknown>;
 }
 
 export interface AuthContextType {
@@ -43,6 +43,7 @@ export interface AuthContextType {
   token: string | null;
   isAuthenticated: boolean;
   isLoading: boolean;
+  isHydrated: boolean;
   login: (credentials: LoginCredentials) => Promise<void>;
   logout: () => void;
   getToken: () => string | null;

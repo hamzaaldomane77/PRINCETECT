@@ -14,6 +14,7 @@ import {
   Bell, 
   LogOut, 
   Eye, 
+  EyeOff,
   Filter, 
   ArrowUpDown, 
   Menu, 
@@ -51,7 +52,10 @@ import {
   Clock,
   X,
   Hash,
-  Code
+  Code,
+  Mail,
+  Phone,
+  Check
 } from 'lucide-react';
 
 export const HomeIcon = ({ className = "w-5 h-5" }: { className?: string }) => (
@@ -132,6 +136,10 @@ export const LogoutIcon = ({ className = "w-5 h-5" }: { className?: string }) =>
 
 export const EyeIcon = ({ className = "w-4 h-4" }: { className?: string }) => (
   <Eye className={className} />
+);
+
+export const EyeOffIcon = ({ className = "w-4 h-4" }: { className?: string }) => (
+  <EyeOff className={className} />
 );
 
 export const FilterIcon = ({ className = "w-4 h-4" }: { className?: string }) => (
@@ -315,4 +323,16 @@ export const HashIcon = ({ className = "w-4 h-4" }: { className?: string }) => (
 
 export const CodeIcon = ({ className = "w-4 h-4" }: { className?: string }) => (
   <Code className={className} />
+);
+
+export const MailIcon = ({ className = "w-4 h-4" }: { className?: string }) => (
+  <Mail className={className} />
+);
+
+export const PhoneIcon = ({ className = "w-4 h-4" }: { className?: string }) => (
+  <Phone className={className} />
+);
+
+export const CheckIcon = ({ className = "w-4 h-4" }: { className?: string }) => (
+  <Check className={className} />
 );

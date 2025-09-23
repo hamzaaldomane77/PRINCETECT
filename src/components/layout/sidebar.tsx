@@ -49,11 +49,11 @@ export function Sidebar({ isCollapsed, onToggle, onPageChange, activePage = 'das
   };
 
   const customerManagementItems = [
-    { id: 'customers', label: 'Customers', icon: CustomersIcon },
-    { id: 'potential-customers', label: 'Potential Customers', icon: PotentialCustomersIcon },
+    { id: 'clients', label: 'Clients', icon: CustomersIcon },
+    { id: 'potential-clients', label: 'Potential Clients', icon: PotentialCustomersIcon },
     { id: 'meetings', label: 'Meetings', icon: MeetingsIcon },
     { id: 'offers', label: 'Offers', icon: OffersIcon },
-    { id: 'active-customers', label: 'Active Customers', icon: ActiveCustomersIcon },
+    { id: 'active-clients', label: 'Active Clients', icon: ActiveCustomersIcon },
     { id: 'contracts', label: 'Contracts', icon: ContractsIcon }
   ];
 
@@ -96,6 +96,7 @@ export function Sidebar({ isCollapsed, onToggle, onPageChange, activePage = 'das
               src="/Layer 13.png"
               alt="Tiki Torch"
               fill
+              sizes="80px"
               className="object-contain opacity-70 dark:opacity-70"
             />
           </div>
@@ -110,6 +111,8 @@ export function Sidebar({ isCollapsed, onToggle, onPageChange, activePage = 'das
                   src="/logo.png"
                   alt="Princetect Logo"
                   fill
+                  sizes="48px"
+                  priority
                   className="object-contain"
                 />
               </div>
@@ -188,7 +191,7 @@ export function Sidebar({ isCollapsed, onToggle, onPageChange, activePage = 'das
         >
           <div className="flex items-center">
             <CustomerManagementIcon className="w-5 h-5 mr-3" />
-            {!isCollapsed && <span>Customer Management</span>}
+            {!isCollapsed && <span>Clients Management</span>}
           </div>
           {!isCollapsed && (
             <ChevronUpIcon className={`w-4 h-4 transition-transform ${

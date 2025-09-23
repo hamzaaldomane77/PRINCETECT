@@ -22,30 +22,38 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [token, setToken] = useState<string | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [isHydrated, setIsHydrated] = useState(false);
 
   // Initialize authentication state from localStorage
   useEffect(() => {
-    // Only run on client side
-    if (typeof window !== 'undefined') {
-      const token = localStorage.getItem('auth-token');
-      const userData = localStorage.getItem('auth-user');
-      
-      if (token && userData) {
-        try {
+    // Only run on client side to prevent hydration mismatch
+    const initializeAuth = () => {
+      try {
+        const token = localStorage.getItem('auth-token');
+        const userData = localStorage.getItem('auth-user');
+        
+        if (token && userData) {
           const user = JSON.parse(userData);
           setUser(user);
           setToken(token);
           setIsAuthenticated(true);
           console.log('Restored authentication from localStorage:', { user, token });
-        } catch (error) {
-          console.error('Error parsing user data from localStorage:', error);
-          // Clear invalid data
-          localStorage.removeItem('auth-token');
-          localStorage.removeItem('auth-user');
         }
+      } catch (error) {
+        console.error('Error parsing user data from localStorage:', error);
+        // Clear invalid data
+        localStorage.removeItem('auth-token');
+        localStorage.removeItem('auth-user');
+      } finally {
+        setIsLoading(false);
+        setIsHydrated(true);
       }
+    };
+
+    // Delay initialization to prevent hydration mismatch
+    if (typeof window !== 'undefined') {
+      initializeAuth();
     }
-    setIsLoading(false);
   }, []);
 
   // Helper function to check if user has a specific role
@@ -206,6 +214,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     token,
     isAuthenticated,
     isLoading,
+    isHydrated,
     login,
     logout,
     getToken,

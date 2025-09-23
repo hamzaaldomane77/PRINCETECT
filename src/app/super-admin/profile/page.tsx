@@ -26,7 +26,7 @@ function ProfileContent() {
                   Profile Management Coming Soon
                 </h3>
                 <p className="text-gray-500 dark:text-gray-400">
-                  This feature is under development. You'll be able to manage your profile here.
+                  This feature is under development. You&apos;ll be able to manage your profile here.
                 </p>
               </div>
             </CardContent>

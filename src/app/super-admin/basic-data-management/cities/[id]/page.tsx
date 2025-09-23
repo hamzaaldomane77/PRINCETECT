@@ -304,7 +304,7 @@ export default function CityDetailsPage() {
             <AlertDialogHeader>
               <AlertDialogTitle>Delete City</AlertDialogTitle>
               <AlertDialogDescription>
-                Are you sure you want to delete "{currentCity.name}"? This action cannot be undone.
+                Are you sure you want to delete &quot;{currentCity.name}&quot;? This action cannot be undone.
                 All associated data with this city will be permanently removed.
               </AlertDialogDescription>
             </AlertDialogHeader>
