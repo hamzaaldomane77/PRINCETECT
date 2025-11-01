@@ -242,20 +242,22 @@ export default function ServiceCategoriesPage() {
             <Breadcrumb items={breadcrumbItems} />
 
             {/* Header */}
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Service Categories Management</h1>
-              <p className="text-gray-600 dark:text-gray-400">Manage service categories and classifications</p>
-            </div>
-            
-            {/* Create Category Button */}
-            <div className="flex justify-end">
-              <Button
-                onClick={handleCreateServiceCategory}
-                className="bg-orange-600 hover:bg-orange-700 text-white flex items-center space-x-2"
-              >
-                <PlusIcon className="h-4 w-4" />
-                <span>Create Category</span>
-              </Button>
+            <div className="flex items-start justify-between">
+              <div className="flex-1">
+                <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Service Categories Management</h1>
+                <p className="text-gray-600 dark:text-gray-400">Manage service categories and classifications</p>
+              </div>
+              
+              {/* Create Category Button */}
+              <div className="flex-shrink-0 ml-6">
+                <Button
+                  onClick={handleCreateServiceCategory}
+                  className="bg-orange-600 hover:bg-orange-700 text-white flex items-center space-x-2"
+                >
+                  <PlusIcon className="h-4 w-4" />
+                  <span>Create Category</span>
+                </Button>
+              </div>
             </div>
 
             {/* Data Table */}

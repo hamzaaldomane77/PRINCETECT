@@ -277,20 +277,22 @@ export default function JobTitlesPage() {
             <Breadcrumb items={breadcrumbItems} />
 
             {/* Header */}
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Job Titles Management</h1>
-              <p className="text-gray-600 dark:text-gray-400">Manage job titles and positions in the company</p>
-            </div>
-            
-            {/* Create Job Title Button */}
-            <div className="flex justify-end">
-              <Button
-                onClick={handleCreateJobTitle}
-                className="bg-orange-600 hover:bg-orange-700 text-white flex items-center space-x-2"
-              >
-                <PlusIcon className="h-4 w-4" />
-                <span>Add New Job Title</span>
-              </Button>
+            <div className="flex items-start justify-between">
+              <div className="flex-1">
+                <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Job Titles Management</h1>
+                <p className="text-gray-600 dark:text-gray-400">Manage job titles and positions in the company</p>
+              </div>
+              
+              {/* Create Job Title Button */}
+              <div className="flex-shrink-0 ml-6">
+                <Button
+                  onClick={handleCreateJobTitle}
+                  className="bg-orange-600 hover:bg-orange-700 text-white flex items-center space-x-2"
+                >
+                  <PlusIcon className="h-4 w-4" />
+                  <span>Add New Job Title</span>
+                </Button>
+              </div>
             </div>
 
             {/* Data Table */}

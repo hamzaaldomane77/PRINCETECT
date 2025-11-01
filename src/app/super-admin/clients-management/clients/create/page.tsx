@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { SuperAdminOnly } from '@/components/auth/protected-route';
 import { AdminLayout } from '@/components/layout/admin-layout';
@@ -11,11 +11,10 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
-import { ArrowLeftIcon, PlusIcon, EyeIcon, EyeOffIcon } from '@/components/ui/icons';
+import { ArrowLeftIcon, PlusIcon, EyeIcon, EyeOffIcon, UploadIcon } from '@/components/ui/icons';
 import { useCreateClient, useCitiesLookup } from '@/modules/clients';
 import { CreateClientRequest, INDUSTRY_OPTIONS, SIZE_OPTIONS, STATUS_OPTIONS } from '@/modules/clients/types';
 import { toast } from 'sonner';
-import { getImageUrl, extractImagePath } from '@/lib/image-utils';
 
 export default function CreateClientPage() {
   const router = useRouter();
@@ -53,6 +52,9 @@ export default function CreateClientPage() {
   const [errors, setErrors] = useState<Record<string, string[]>>({});
   const [isValidating, setIsValidating] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [logoPreview, setLogoPreview] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const breadcrumbItems = [
     { label: 'Clients Management', href: '/super-admin/clients-management' },
@@ -210,6 +212,40 @@ export default function CreateClientPage() {
     }));
   };
 
+  const handleLogoChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        toast.error('Please select a valid image file');
+        return;
+      }
+      
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error('File size must be less than 5MB');
+        return;
+      }
+      
+      setLogoFile(file);
+      
+      // Create preview
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setLogoPreview(e.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const removeLogo = () => {
+    setLogoFile(null);
+    setLogoPreview(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsValidating(true);
@@ -224,18 +260,55 @@ export default function CreateClientPage() {
     }
 
     try {
-      // Create a clean copy with only meaningful values
-      const cleanedData = { ...formData };
+      // Create FormData for file upload
+      const formDataToSend = new FormData();
       
-      // Remove empty string values and undefined values but keep false boolean values
-      Object.keys(cleanedData).forEach(key => {
-        const value = cleanedData[key as keyof typeof cleanedData];
-        if (value === '' || value === null || (value === undefined && key !== 'is_active')) {
-          delete cleanedData[key as keyof typeof cleanedData];
+      // Required fields - always send these
+      const requiredFields = ['name', 'email', 'status'];
+      
+      // Add all form fields
+      Object.keys(formData).forEach(key => {
+        const value = formData[key as keyof CreateClientRequest];
+        
+        // Skip logo field if we have a file to upload instead
+        if (key === 'logo' && logoFile) {
+          return;
+        }
+        
+        // Always send required fields
+        if (requiredFields.includes(key)) {
+          formDataToSend.append(key, value?.toString() || '');
+          return;
+        }
+        
+        if (value !== null && value !== undefined) {
+          if (key === 'is_active') {
+            formDataToSend.append(key, value ? '1' : '0');
+          } else if (key === 'preferences' && Array.isArray(value)) {
+            // Handle preferences array
+            value.forEach((pref, index) => {
+              formDataToSend.append(`preferences[${index}]`, pref);
+            });
+          } else if (key === 'city_id' && value !== undefined && value !== null) {
+            formDataToSend.append(key, value.toString());
+          } else if (value !== '' && typeof value !== 'undefined') {
+            formDataToSend.append(key, value.toString());
+          }
         }
       });
 
-      await createClientMutation.mutateAsync(cleanedData);
+      // Add logo file if selected
+      if (logoFile) {
+        formDataToSend.append('logo', logoFile);
+      }
+
+      // Debug: Log FormData contents
+      console.log('FormData contents:');
+      for (let [key, value] of formDataToSend.entries()) {
+        console.log(`${key}:`, value);
+      }
+
+      await createClientMutation.mutateAsync(formDataToSend as any);
       toast.success('Client created successfully!');
       router.push('/super-admin/clients-management/clients');
     } catch (error) {
@@ -613,23 +686,65 @@ export default function CreateClientPage() {
                         {renderFieldErrors('linkedin')}
                       </div>
 
-                      {/* Logo URL */}
+                      {/* Logo Upload */}
                       <div className="space-y-2 md:col-span-2">
                         <Label htmlFor="logo" className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                          Company Logo URL
+                          Company Logo
                         </Label>
-                        <Input
-                          id="logo"
-                          value={formData.logo || ''}
-                          onChange={(e) => handleInputChange('logo', e.target.value)}
-                          placeholder="https://example.com/logo.png"
-                          className={`h-11 ${errors.logo ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''}`}
-                        />
+                        <div className="space-y-3">
+                          <input
+                            ref={fileInputRef}
+                            type="file"
+                            id="logo"
+                            accept="image/*"
+                            onChange={handleLogoChange}
+                            className="hidden"
+                          />
+                          
+                          {logoPreview ? (
+                            <div className="flex items-center space-x-4 p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
+                              <img
+                                src={logoPreview}
+                                alt="Logo preview"
+                                className="w-16 h-16 object-cover rounded-lg"
+                              />
+                              <div className="flex-1">
+                                <p className="text-sm text-gray-600 dark:text-gray-400">
+                                  {logoFile?.name}
+                                </p>
+                                <p className="text-xs text-gray-500 dark:text-gray-500">
+                                  {(logoFile?.size ? logoFile.size / 1024 : 0).toFixed(1)} KB
+                                </p>
+                              </div>
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                onClick={removeLogo}
+                                className="text-red-600 hover:text-red-700"
+                              >
+                                Remove
+                              </Button>
+                            </div>
+                          ) : (
+                            <div
+                              onClick={() => fileInputRef.current?.click()}
+                              className="flex items-center justify-center w-full h-32 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg cursor-pointer hover:border-orange-500 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-colors"
+                            >
+                              <div className="text-center">
+                                <UploadIcon className="h-8 w-8 text-gray-400 mx-auto mb-2" />
+                                <p className="text-sm text-gray-600 dark:text-gray-400">
+                                  Click to upload logo
+                                </p>
+                                <p className="text-xs text-gray-500 dark:text-gray-500">
+                                  PNG, JPG up to 5MB
+                                </p>
+                              </div>
+                            </div>
+                          )}
+                        </div>
                         {renderFieldErrors('logo')}
-                        <p className="text-xs text-gray-500 dark:text-gray-400">
-                          Enter the URL of the company logo image
-                        </p>
-                    </div>
+                      </div>
 
                       {/* Industry */}
                       <div className="space-y-2">

@@ -23,7 +23,10 @@ import {
   DepartmentsIcon,
   ServicesIcon,
   ServiceCategoriesIcon,
-  WorkflowIcon
+  WorkflowIcon,
+  PdaDocumentsIcon,
+  AidaFunnelsIcon,
+  MarketingChannelsIcon
 } from '@/components/ui/icons';
 
 interface SidebarProps {
@@ -298,6 +301,51 @@ export function Sidebar({ isCollapsed, onToggle, onPageChange, activePage = 'das
             ))}
           </div>
         )}
+        
+        {/* PDA Documents - standalone menu item */}
+        <Button
+          variant="ghost"
+          size="sm"
+          className={`w-full justify-start cursor-pointer transition-all duration-200 ${
+            activePage === 'pda-documents' 
+              ? 'bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 border-r-2 border-orange-500' 
+              : 'hover:bg-gray-100 dark:hover:bg-gray-800'
+          }`}
+          onClick={() => onPageChange?.('pda-documents')}
+        >
+          <PdaDocumentsIcon className="w-5 h-5 mr-3" />
+          {!isCollapsed && <span>PDA Documents</span>}
+        </Button>
+
+        {/* AIDA Funnels - standalone menu item */}
+        <Button
+          variant="ghost"
+          size="sm"
+          className={`w-full justify-start cursor-pointer transition-all duration-200 ${
+            activePage === 'aida-funnels' 
+              ? 'bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 border-r-2 border-orange-500' 
+              : 'hover:bg-gray-100 dark:hover:bg-gray-800'
+          }`}
+          onClick={() => onPageChange?.('aida-funnels')}
+        >
+          <AidaFunnelsIcon className="w-5 h-5 mr-3" />
+          {!isCollapsed && <span>AIDA Funnels</span>}
+        </Button>
+
+        {/* Marketing Channels - standalone menu item */}
+        <Button
+          variant="ghost"
+          size="sm"
+          className={`w-full justify-start cursor-pointer transition-all duration-200 ${
+            activePage === 'marketing-channels' 
+              ? 'bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 border-r-2 border-orange-500' 
+              : 'hover:bg-gray-100 dark:hover:bg-gray-800'
+          }`}
+          onClick={() => onPageChange?.('marketing-channels')}
+        >
+          <MarketingChannelsIcon className="w-5 h-5 mr-3" />
+          {!isCollapsed && <span>Marketing Channels</span>}
+        </Button>
       </nav>
 
       {/* Removed old bottom image block and kept background image instead */}

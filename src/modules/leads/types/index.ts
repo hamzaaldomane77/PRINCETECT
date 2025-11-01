@@ -1,5 +1,120 @@
 // Lead Types
 
+// Client interface for the client object in lead details
+export interface LeadClient {
+  id: number;
+  email: string;
+  name: string;
+  phone: string | null;
+  mobile: string | null;
+  company_name: string | null;
+  position: string | null;
+  address: string | null;
+  website: string | null;
+  linkedin: string | null;
+  logo: string | null;
+  registration_number: string | null;
+  status: 'active' | 'inactive' | 'suspended';
+  activated_at: string | null;
+  suspended_at: string | null;
+  notes: string | null;
+  preferences: any | null;
+  created_at: string;
+  updated_at: string;
+  city_id: number | null;
+  contact_person: string | null;
+  contact_position: string | null;
+  fax: string | null;
+  industry: 'technology' | 'healthcare' | 'finance' | 'education' | 'retail' | 'manufacturing' | 'services' | 'other' | null;
+  size: 'startup' | 'small' | 'medium' | 'large' | 'enterprise' | null;
+  annual_revenue: string | null;
+  contract_start_date: string | null;
+  contract_end_date: string | null;
+  payment_terms: string | null;
+  credit_limit: string | null;
+  is_active: number;
+  lead_id: number;
+}
+
+// Meeting interface for meetings array
+export interface LeadMeeting {
+  id: number;
+  lead_id: number;
+  client_id: number | null;
+  title: string;
+  description: string | null;
+  meeting_date: string;
+  meeting_time: string;
+  duration_minutes: number;
+  location: string | null;
+  meeting_type: 'in_person' | 'video_call' | 'phone_call' | 'other';
+  category: 'internal' | 'external' | 'client' | 'other';
+  participants: Record<string, any> | null;
+  agenda: string | null;
+  type: 'lead' | 'client';
+  proposed_dates: string[] | null;
+  confirmed_date: string | null;
+  status: 'scheduled' | 'completed' | 'cancelled' | 'rescheduled';
+  outcomes: string[] | null;
+  action_items: string[] | null;
+  next_steps: string[] | null;
+  created_by: number;
+  notes: string | null;
+  created_at: string;
+  updated_at: string;
+  assigned_to: number;
+  is_active: boolean;
+}
+
+// Quotation interface for quotations array
+export interface LeadQuotation {
+  id: number;
+  lead_id: number;
+  quotation_number: string;
+  title: string;
+  description: string | null;
+  subtotal: string;
+  tax_rate: string;
+  tax_amount: string;
+  discount_rate: string;
+  discount_amount: string;
+  total_amount: string;
+  currency: string;
+  valid_until: string;
+  status: 'draft' | 'sent' | 'accepted' | 'rejected' | 'expired';
+  sent_date: string | null;
+  accepted_date: string | null;
+  rejected_date: string | null;
+  rejection_reason: string | null;
+  notes: string | null;
+  terms_conditions: string | null;
+  assigned_to: number;
+  created_at: string;
+  updated_at: string;
+  meeting_id: number | null;
+  client_id: number | null;
+}
+
+// Contract interface for contracts array
+export interface LeadContract {
+  id: number;
+  lead_id: number;
+  client_id: number | null;
+  contract_number: string;
+  title: string;
+  description: string | null;
+  start_date: string;
+  end_date: string;
+  value: string;
+  currency: string;
+  status: 'draft' | 'active' | 'completed' | 'cancelled' | 'expired';
+  terms_conditions: string | null;
+  notes: string | null;
+  created_at: string;
+  updated_at: string;
+  assigned_to: number;
+}
+
 export interface Lead {
   id: number;
   name: string;
@@ -33,7 +148,7 @@ export interface Lead {
   annual_revenue: string | null;
   is_active: number;
   client_id: number | null;
-  client: any | null;
+  client: LeadClient | null;
   city: {
     id: number;
     name: string;
@@ -86,6 +201,9 @@ export interface Lead {
     updated_at: string;
     name: string;
   } | null;
+  meetings: LeadMeeting[];
+  quotations: LeadQuotation[];
+  contracts: LeadContract[];
 }
 
 export interface LeadsResponse {

@@ -9,15 +9,15 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { ArrowLeftIcon, SaveIcon } from '@/components/ui/icons';
+import { ArrowLeftIcon, SaveIcon, CalendarIcon } from '@/components/ui/icons';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar } from '@/components/ui/calendar';
 import { useLead, useUpdateLead } from '@/modules/leads';
 import { UpdateLeadRequest } from '@/modules/leads/types';
 import { useCities } from '@/modules/cities';
 import { useEmployees } from '@/modules/employees';
-import { getImageUrl } from '@/lib/image-utils';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
 
 interface EditLeadPageProps {
@@ -44,7 +44,7 @@ export default function EditLeadPage({ params }: EditLeadPageProps) {
     logo: null,
     registration_number: null,
     alternative_contact: null,
-    status: 'new',
+    status: 'contacted',
     priority: 'medium',
     source: null,
     assigned_to: null,
@@ -64,6 +64,8 @@ export default function EditLeadPage({ params }: EditLeadPageProps) {
 
   const [loading, setLoading] = useState(false);
   const [validationErrors, setValidationErrors] = useState<Record<string, string[]>>({});
+  const [expectedClosingDateOpen, setExpectedClosingDateOpen] = useState(false);
+  const [expectedClosingDateCaptionLayout, setExpectedClosingDateCaptionLayout] = useState<"dropdown" | "dropdown-months" | "dropdown-years">("dropdown");
 
   // Fetch lead data and lookup data
   const { data: leadResponse, isLoading, error } = useLead(leadId);
@@ -175,6 +177,29 @@ export default function EditLeadPage({ params }: EditLeadPageProps) {
 
   const handleSwitchChange = (name: keyof UpdateLeadRequest, checked: boolean) => {
     setFormData(prev => ({ ...prev, [name]: checked }));
+  };
+
+  // Helper function to format date for display
+  const formatDate = (date: string | undefined) => {
+    if (!date) return '';
+    return new Date(date).toLocaleDateString('en-CA'); // YYYY-MM-DD format
+  };
+
+  // Helper function to format date to YYYY-MM-DD without timezone issues
+  const formatDateToISO = (date: Date) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
+  // Helper function to handle date selection
+  const handleDateSelect = (field: 'expected_closing_date', date: Date | undefined) => {
+    if (date) {
+      const formattedDate = formatDateToISO(date); // Use local date without timezone conversion
+      setFormData(prev => ({ ...prev, [field]: formattedDate }));
+    }
+    setExpectedClosingDateOpen(false);
   };
 
   const validateForm = () => {
@@ -686,14 +711,60 @@ export default function EditLeadPage({ params }: EditLeadPageProps) {
                       </div>
 
                       <div className="space-y-2">
-                        <Label htmlFor="expected_closing_date">Expected Closing Date</Label>
-                        <Input
-                          id="expected_closing_date"
-                          name="expected_closing_date"
-                          type="date"
-                          value={formData.expected_closing_date || ''}
-                          onChange={(e) => handleInputChange(e)}
-                        />
+                        <Label htmlFor="expected_closing_date" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                          Expected Closing Date
+                        </Label>
+                        <Popover open={expectedClosingDateOpen} onOpenChange={setExpectedClosingDateOpen}>
+                          <PopoverTrigger asChild>
+                            <Button
+                              variant="outline"
+                              className={`w-full justify-start text-left font-normal h-11 ${
+                                !formData.expected_closing_date && 'text-muted-foreground'
+                              }`}
+                            >
+                              <CalendarIcon className="mr-2 h-4 w-4" />
+                              {formData.expected_closing_date ? formatDate(formData.expected_closing_date) : 'Select expected closing date'}
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-auto p-0" align="start">
+                            <div className="p-3">
+                              <Calendar
+                                mode="single"
+                                selected={formData.expected_closing_date ? new Date(formData.expected_closing_date) : undefined}
+                                onSelect={(date) => handleDateSelect('expected_closing_date', date)}
+                                disabled={(date) => date < new Date()}
+                                captionLayout={expectedClosingDateCaptionLayout}
+                                initialFocus
+                              />
+                              <div className="mt-3 flex flex-col gap-3">
+                                <Label htmlFor="expected-closing-date-dropdown" className="px-1 text-sm">
+                                  Date Selection Mode
+                                </Label>
+                                <Select
+                                  value={expectedClosingDateCaptionLayout}
+                                  onValueChange={(value) =>
+                                    setExpectedClosingDateCaptionLayout(
+                                      value as "dropdown" | "dropdown-months" | "dropdown-years"
+                                    )
+                                  }
+                                >
+                                  <SelectTrigger
+                                    id="expected-closing-date-dropdown"
+                                    size="sm"
+                                    className="bg-background w-full"
+                                  >
+                                    <SelectValue placeholder="Select mode" />
+                                  </SelectTrigger>
+                                  <SelectContent align="center">
+                                    <SelectItem value="dropdown">Month and Year</SelectItem>
+                                    <SelectItem value="dropdown-months">Month Only</SelectItem>
+                                    <SelectItem value="dropdown-years">Year Only</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                            </div>
+                          </PopoverContent>
+                        </Popover>
                       </div>
                     </div>
                   </div>

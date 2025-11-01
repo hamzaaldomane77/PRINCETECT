@@ -8,7 +8,7 @@ import { Breadcrumb } from '@/components/ui/breadcrumb';
 import { DataTable, Column, ActionButton } from '@/components/ui/data-table';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { EyeIcon, EditIcon, TrashIcon, PlusIcon, RefreshIcon } from '@/components/ui/icons';
+import { EyeIcon, EditIcon, TrashIcon, PlusIcon, RefreshIcon, FileTextIcon, CheckCircleIcon, CalendarIcon, XIcon, MoreVerticalIcon } from '@/components/ui/icons';
 import { 
   AlertDialog,
   AlertDialogAction,
@@ -19,6 +19,12 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { useMeetings, useDeleteMeeting } from '@/modules/meetings';
 import { Meeting } from '@/modules/meetings/types';
 import { toast } from 'sonner';
@@ -51,6 +57,9 @@ export default function MeetingsPage() {
   const [meetingToDelete, setMeetingToDelete] = useState<Meeting | null>(null);
   const [errorDialogOpen, setErrorDialogOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  const [completeDialogOpen, setCompleteDialogOpen] = useState(false);
+  const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
+  const [meetingForAction, setMeetingForAction] = useState<Meeting | null>(null);
   const router = useRouter();
 
   const breadcrumbItems = [
@@ -115,6 +124,114 @@ export default function MeetingsPage() {
     }
   };
 
+  const handleAttachments = (meeting: Meeting) => {
+    router.push(`/super-admin/clients-management/meetings/${meeting.id}/attachments`);
+  };
+
+  const handleComplete = (meeting: Meeting) => {
+    setMeetingForAction(meeting);
+    setCompleteDialogOpen(true);
+  };
+
+  const handleReschedule = (meeting: Meeting) => {
+    router.push(`/super-admin/clients-management/meetings/${meeting.id}/reschedule`);
+  };
+
+  const handleCancel = (meeting: Meeting) => {
+    setMeetingForAction(meeting);
+    setCancelDialogOpen(true);
+  };
+
+  const confirmComplete = async () => {
+    if (!meetingForAction) return;
+    
+    try {
+      // Call complete API
+      const response = await fetch(`https://princetect.peaklink.pro/api/v1/admin/meetings/${meetingForAction.id}/complete`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'X-Requested-With': 'XMLHttpRequest',
+          'Authorization': `Bearer ${localStorage.getItem('auth-token')}`,
+        },
+      });
+      
+      console.log('Complete Meeting API Response:', {
+        status: response.status,
+        statusText: response.statusText,
+        url: response.url,
+        headers: Object.fromEntries(response.headers.entries())
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        console.log('Complete Meeting Success Data:', data);
+        toast.success('Meeting completed successfully!');
+        refetch();
+      } else {
+        const errorData = await response.json().catch(() => ({}));
+        console.error('Complete Meeting Error:', {
+          status: response.status,
+          statusText: response.statusText,
+          error: errorData
+        });
+        toast.error(`Failed to complete meeting: ${response.status} ${response.statusText}`);
+      }
+    } catch (error) {
+      console.error('Complete Meeting Network Error:', error);
+      toast.error('Failed to complete meeting. Please try again.');
+    } finally {
+      setCompleteDialogOpen(false);
+      setMeetingForAction(null);
+    }
+  };
+
+  const confirmCancel = async () => {
+    if (!meetingForAction) return;
+    
+    try {
+      // Call cancel API
+      const response = await fetch(`https://princetect.peaklink.pro/api/v1/admin/meetings/${meetingForAction.id}/cancel`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'X-Requested-With': 'XMLHttpRequest',
+          'Authorization': `Bearer ${localStorage.getItem('auth-token')}`,
+        },
+      });
+      
+      console.log('Cancel Meeting API Response:', {
+        status: response.status,
+        statusText: response.statusText,
+        url: response.url,
+        headers: Object.fromEntries(response.headers.entries())
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        console.log('Cancel Meeting Success Data:', data);
+        toast.success('Meeting cancelled successfully!');
+        refetch();
+      } else {
+        const errorData = await response.json().catch(() => ({}));
+        console.error('Cancel Meeting Error:', {
+          status: response.status,
+          statusText: response.statusText,
+          error: errorData
+        });
+        toast.error(`Failed to cancel meeting: ${response.status} ${response.statusText}`);
+      }
+    } catch (error) {
+      console.error('Cancel Meeting Network Error:', error);
+      toast.error('Failed to cancel meeting. Please try again.');
+    } finally {
+      setCancelDialogOpen(false);
+      setMeetingForAction(null);
+    }
+  };
+
   // Define table columns
   const columns: Column[] = [
     { key: 'id', label: 'ID', type: 'text', width: '60px' },
@@ -133,7 +250,7 @@ export default function MeetingsPage() {
     { key: 'actions', label: 'Actions', type: 'actions', align: 'center' }
   ];
 
-  // Define action buttons
+  // Define action buttons with dropdown menu
   const actions: ActionButton[] = [
     {
       icon: EyeIcon,
@@ -154,11 +271,41 @@ export default function MeetingsPage() {
       }
     },
     {
-      icon: TrashIcon,
-      label: 'Delete Meeting',
-      color: 'text-red-600 dark:text-red-400',
-      hoverColor: 'hover:bg-red-100 dark:hover:bg-red-900',
-      onClick: handleDeleteMeeting
+      icon: MoreVerticalIcon,
+      label: 'More Actions',
+      color: 'text-gray-600 dark:text-gray-400',
+      hoverColor: 'hover:bg-gray-100 dark:hover:bg-gray-900',
+      onClick: (meeting: Meeting) => {
+        // This will be handled by the dropdown menu
+      },
+      dropdownItems: [
+        {
+          icon: FileTextIcon,
+          label: 'Manage Attachments',
+          onClick: handleAttachments
+        },
+        {
+          icon: CheckCircleIcon,
+          label: 'Complete Meeting',
+          onClick: handleComplete
+        },
+        {
+          icon: CalendarIcon,
+          label: 'Reschedule Meeting',
+          onClick: handleReschedule
+        },
+        {
+          icon: XIcon,
+          label: 'Cancel Meeting',
+          onClick: handleCancel
+        },
+        {
+          icon: TrashIcon,
+          label: 'Delete Meeting',
+          onClick: handleDeleteMeeting,
+          className: 'text-red-600 dark:text-red-400'
+        }
+      ]
     }
   ];
 
@@ -174,23 +321,7 @@ export default function MeetingsPage() {
     console.log('Filter clicked');
   };
 
-  // Function to format date with day, month, year
-  const formatDate = (dateString: string) => {
-    if (!dateString) return 'N/A';
-    
-    try {
-      const date = new Date(dateString);
-      return date.toLocaleDateString('en-GB', {
-        day: '2-digit',
-        month: '2-digit', 
-        year: 'numeric'
-      });
-    } catch (error) {
-      return 'Invalid Date';
-    }
-  };
-
-  // Function to format time
+  // Function to format time (for display in text fields, not date fields)
   const formatTime = (timeString: string) => {
     if (!timeString) return 'N/A';
     
@@ -210,7 +341,7 @@ export default function MeetingsPage() {
     ...meeting,
     logo: meeting.lead?.logo || meeting.client?.logo || '/placeholder-logo.svg',
     client_name: meeting.lead?.name || meeting.client?.name || 'N/A',
-    meeting_date: formatDate(meeting.meeting_date),
+    meeting_date: meeting.meeting_date, // Let DataTable format it if column type is 'date', otherwise keep as string
     meeting_time: formatTime(meeting.meeting_time),
     duration_minutes: `${meeting.duration_minutes} min`,
     assigned_employee_name: meeting.assigned_employee?.name || 'N/A',
@@ -229,7 +360,7 @@ export default function MeetingsPage() {
         {meeting.category.charAt(0).toUpperCase() + meeting.category.slice(1)}
       </Badge>
     ),
-    created_at: formatDate(meeting.created_at),
+    created_at: meeting.created_at, // Let DataTable format it
   }));
 
   // Error display component
@@ -343,20 +474,22 @@ export default function MeetingsPage() {
             <Breadcrumb items={breadcrumbItems} />
 
             {/* Header */}
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Meetings Management</h1>
-              <p className="text-gray-600 dark:text-gray-400">Schedule and manage customer meetings</p>
-            </div>
-            
-            {/* Create Meeting Button */}
-            <div className="flex justify-end">
-              <Button
-                onClick={handleCreateMeeting}
-                className="bg-orange-600 hover:bg-orange-700 text-white flex items-center space-x-2"
-              >
-                <PlusIcon className="h-4 w-4" />
-                <span>Create Meeting</span>
-              </Button>
+            <div className="flex items-start justify-between">
+              <div className="flex-1">
+                <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Meetings Management</h1>
+                <p className="text-gray-600 dark:text-gray-400">Schedule and manage customer meetings</p>
+              </div>
+              
+              {/* Create Meeting Button */}
+              <div className="flex-shrink-0 ml-6">
+                <Button
+                  onClick={handleCreateMeeting}
+                  className="bg-orange-600 hover:bg-orange-700 text-white flex items-center space-x-2"
+                >
+                  <PlusIcon className="h-4 w-4" />
+                  <span>Create Meeting</span>
+                </Button>
+              </div>
             </div>
 
             {/* Data Table */}
@@ -439,6 +572,52 @@ export default function MeetingsPage() {
             <AlertDialogFooter>
               <AlertDialogAction onClick={() => setErrorDialogOpen(false)}>
                 OK
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
+        {/* Complete Meeting Dialog */}
+        <AlertDialog open={completeDialogOpen} onOpenChange={setCompleteDialogOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Complete Meeting</AlertDialogTitle>
+              <AlertDialogDescription>
+                Are you sure you want to mark the meeting &quot;{meetingForAction?.title}&quot; as completed?
+                <br />
+                <span className="text-green-600 font-medium">This action will update the meeting status.</span>
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={confirmComplete}
+                className="bg-green-600 hover:bg-green-700 text-white"
+              >
+                Complete Meeting
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
+        {/* Cancel Meeting Dialog */}
+        <AlertDialog open={cancelDialogOpen} onOpenChange={setCancelDialogOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Cancel Meeting</AlertDialogTitle>
+              <AlertDialogDescription>
+                Are you sure you want to cancel the meeting &quot;{meetingForAction?.title}&quot;?
+                <br />
+                <span className="text-red-600 font-medium">This action cannot be undone.</span>
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={confirmCancel}
+                className="bg-red-600 hover:bg-red-700 text-white"
+              >
+                Cancel Meeting
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>

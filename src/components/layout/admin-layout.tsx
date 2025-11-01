@@ -27,6 +27,15 @@ export function AdminLayout({ children }: AdminLayoutProps) {
       const route = pathname.replace('/super-admin/', '');
       if (route === '') {
         pageId = 'dashboard';
+      } else       if (pathname.includes('/pda-documents')) {
+        // Handle PDA Documents routes
+        pageId = 'pda-documents';
+      } else if (pathname.includes('/aida-funnels')) {
+        // Handle AIDA Funnels routes
+        pageId = 'aida-funnels';
+      } else if (pathname.includes('/marketing-channels')) {
+        // Handle Marketing Channels routes
+        pageId = 'marketing-channels';
       } else {
         // Handle nested routes
         const routeParts = route.split('/');
@@ -89,6 +98,15 @@ export function AdminLayout({ children }: AdminLayoutProps) {
         break;
       case 'workflow':
         router.push('/super-admin/services-management/workflow');
+        break;
+      case 'pda-documents':
+        router.push('/super-admin/pda-documents');
+        break;
+      case 'aida-funnels':
+        router.push('/super-admin/aida-funnels');
+        break;
+      case 'marketing-channels':
+        router.push('/super-admin/marketing-channels');
         break;
       default:
         router.push('/super-admin');

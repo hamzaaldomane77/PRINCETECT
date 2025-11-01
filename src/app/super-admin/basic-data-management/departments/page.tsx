@@ -242,20 +242,22 @@ export default function DepartmentsPage() {
             <Breadcrumb items={breadcrumbItems} />
 
             {/* Header */}
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Departments Management</h1>
-              <p className="text-gray-600 dark:text-gray-400">Manage organizational departments and structure</p>
-            </div>
-            
-            {/* Create Department Button */}
-            <div className="flex justify-end">
-              <Button
-                onClick={handleCreateDepartment}
-                className="bg-orange-600 hover:bg-orange-700 text-white flex items-center space-x-2"
-              >
-                <PlusIcon className="h-4 w-4" />
-                <span>Create Department</span>
-              </Button>
+            <div className="flex items-start justify-between">
+              <div className="flex-1">
+                <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Departments Management</h1>
+                <p className="text-gray-600 dark:text-gray-400">Manage organizational departments and structure</p>
+              </div>
+              
+              {/* Create Department Button */}
+              <div className="flex-shrink-0 ml-6">
+                <Button
+                  onClick={handleCreateDepartment}
+                  className="bg-orange-600 hover:bg-orange-700 text-white flex items-center space-x-2"
+                >
+                  <PlusIcon className="h-4 w-4" />
+                  <span>Create Department</span>
+                </Button>
+              </div>
             </div>
 
             {/* Data Table */}

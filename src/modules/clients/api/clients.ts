@@ -76,7 +76,18 @@ export class ClientsAPI {
   }
 
   // Create new client
-  static async createClient(data: CreateClientRequest): Promise<Client> {
+  static async createClient(data: CreateClientRequest | FormData): Promise<Client> {
+    // Check if data is FormData (for file uploads)
+    if (data instanceof FormData) {
+      return await apiClient.postFormData<{ success: boolean; data: { client: Client } }>(API_BASE, data).then(result => {
+        if (!result.success) {
+          throw new Error('Failed to create client');
+        }
+        return result.data.client;
+      });
+    }
+
+    // Handle regular JSON data
     const apiData = {
       ...data,
       is_active: data.is_active !== undefined ? (data.is_active ? 1 : 0) : undefined,

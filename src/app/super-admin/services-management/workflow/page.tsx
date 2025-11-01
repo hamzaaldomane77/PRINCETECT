@@ -198,42 +198,44 @@ export default function WorkflowPage() {
             <Breadcrumb items={breadcrumbItems} />
 
             {/* Header */}
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Workflow Management</h1>
-              <p className="text-gray-600 dark:text-gray-400">Manage service workflows and processes</p>
-              
-              {/* Tasks Management Notice */}
-              <div className="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
-                <div className="flex items-start">
-                  <div className="flex-shrink-0">
-                    <svg className="h-5 w-5 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
-                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-                    </svg>
-                  </div>
-                  <div className="ml-3">
-                    <h3 className="text-sm font-medium text-blue-800 dark:text-blue-200">
-                      Task Management Available
-                    </h3>
-                    <div className="mt-2 text-sm text-blue-700 dark:text-blue-300">
-                      <p>
-                        Task management is now available! Click &quot;View Tasks&quot; to see and manage tasks for each workflow. 
-                        Tasks are loaded with workflow details and can be filtered and searched locally.
-                      </p>
+            <div className="flex items-start justify-between">
+              <div className="flex-1">
+                <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Workflow Management</h1>
+                <p className="text-gray-600 dark:text-gray-400">Manage service workflows and processes</p>
+                
+                {/* Tasks Management Notice */}
+                <div className="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+                  <div className="flex items-start">
+                    <div className="flex-shrink-0">
+                      <svg className="h-5 w-5 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                      </svg>
+                    </div>
+                    <div className="ml-3">
+                      <h3 className="text-sm font-medium text-blue-800 dark:text-blue-200">
+                        Task Management Available
+                      </h3>
+                      <div className="mt-2 text-sm text-blue-700 dark:text-blue-300">
+                        <p>
+                          Task management is now available! Click &quot;View Tasks&quot; to see and manage tasks for each workflow. 
+                          Tasks are loaded with workflow details and can be filtered and searched locally.
+                        </p>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
-            
-            {/* Create Workflow Button */}
-            <div className="flex justify-end">
-              <Button
-                onClick={handleCreateWorkflow}
-                className="bg-orange-600 hover:bg-orange-700 text-white flex items-center space-x-2"
-              >
-                <PlusIcon className="h-4 w-4" />
-                <span>Create Workflow</span>
-              </Button>
+              
+              {/* Create Workflow Button */}
+              <div className="flex-shrink-0 ml-6">
+                <Button
+                  onClick={handleCreateWorkflow}
+                  className="bg-orange-600 hover:bg-orange-700 text-white flex items-center space-x-2"
+                >
+                  <PlusIcon className="h-4 w-4" />
+                  <span>Create Workflow</span>
+                </Button>
+              </div>
             </div>
 
             {/* Data Table */}

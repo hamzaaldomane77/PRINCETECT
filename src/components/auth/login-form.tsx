@@ -127,7 +127,7 @@ export default function LoginForm() {
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>
                 <Label htmlFor="email" className="text-gray-700 dark:text-gray-300">
-                  البريد الإلكتروني
+                email
                 </Label>
                 <input
                   id="email"
@@ -143,8 +143,7 @@ export default function LoginForm() {
 
               <div>
                 <Label htmlFor="password" className="text-gray-700 dark:text-gray-300">
-                  كلمة المرور
-                </Label>
+                password                </Label>
                 <div className="relative">
                   <input
                     id="password"
@@ -152,7 +151,7 @@ export default function LoginForm() {
                     value={credentials.password}
                     onChange={(e) => handleInputChange('password', e.target.value)}
                     className="mt-1 w-full px-3 py-2 pr-10 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 dark:bg-gray-800 dark:text-white"
-                    placeholder="أدخل كلمة المرور"
+                   
                     required
                     disabled={isLoading}
                   />

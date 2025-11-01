@@ -7,6 +7,12 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Pagination } from "@/components/ui/pagination"
 import { SearchIcon, FilterIcon, EyeIcon, EditIcon, TrashIcon, CheckCircleIcon, XIcon } from "@/components/ui/icons"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { cn } from "@/lib/utils"
 
 export interface Column {
@@ -26,6 +32,12 @@ export interface ActionButton {
   color?: string
   hoverColor?: string
   onClick: (item: any) => void
+  dropdownItems?: Array<{
+    icon: React.ComponentType<{ className?: string }>
+    label: string
+    onClick: (item: any) => void
+    className?: string
+  }>
 }
 
 export interface DataTableProps {
@@ -152,15 +164,26 @@ export function DataTable({
   }
 
   const formatDate = (dateString: string) => {
-    const date = new Date(dateString)
-    return date.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit'
-    })
+    // Handle null, undefined, or empty strings
+    if (!dateString) return '-'
+    
+    try {
+      const date = new Date(dateString)
+      
+      // Check if date is valid
+      if (isNaN(date.getTime())) {
+        return '-'
+      }
+      
+      return date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
+      })
+    } catch (error) {
+      console.error('Error formatting date:', error)
+      return '-'
+    }
   }
 
   const renderCell = (item: any, column: Column) => {
@@ -203,22 +226,59 @@ export function DataTable({
       case 'actions':
         return (
           <div className="flex items-center space-x-2">
-            {actions.map((action, index) => (
-              <Button
-                key={index}
-                variant={action.variant || "ghost"}
-                size="sm"
-                className={cn(
-                  "rounded-full",
-                  action.color || "text-gray-600 dark:text-gray-300",
-                  action.hoverColor || "hover:bg-gray-100 dark:hover:bg-gray-800"
-                )}
-                onClick={() => action.onClick(item)}
-                title={action.label}
-              >
-                <action.icon className="h-4 w-4" />
-              </Button>
-            ))}
+            {actions.map((action, index) => {
+              // If action has dropdown items, render dropdown menu
+              if (action.dropdownItems && action.dropdownItems.length > 0) {
+                return (
+                  <DropdownMenu key={index}>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant={action.variant || "ghost"}
+                        size="sm"
+                        className={cn(
+                          "rounded-full",
+                          action.color || "text-gray-600 dark:text-gray-300",
+                          action.hoverColor || "hover:bg-gray-100 dark:hover:bg-gray-800"
+                        )}
+                        title={action.label}
+                      >
+                        <action.icon className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      {action.dropdownItems.map((dropdownItem, dropdownIndex) => (
+                        <DropdownMenuItem
+                          key={dropdownIndex}
+                          onClick={() => dropdownItem.onClick(item)}
+                          className={dropdownItem.className}
+                        >
+                          <dropdownItem.icon className="h-4 w-4 mr-2" />
+                          {dropdownItem.label}
+                        </DropdownMenuItem>
+                      ))}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                )
+              }
+              
+              // Otherwise render normal button
+              return (
+                <Button
+                  key={index}
+                  variant={action.variant || "ghost"}
+                  size="sm"
+                  className={cn(
+                    "rounded-full",
+                    action.color || "text-gray-600 dark:text-gray-300",
+                    action.hoverColor || "hover:bg-gray-100 dark:hover:bg-gray-800"
+                  )}
+                  onClick={() => action.onClick(item)}
+                  title={action.label}
+                >
+                  <action.icon className="h-4 w-4" />
+                </Button>
+              )
+            })}
           </div>
         )
       
@@ -267,7 +327,7 @@ export function DataTable({
       )}
 
       {/* Table Container */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm w-full">
+      <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm w-full mb-6">
         <div className="overflow-x-auto w-full">
           <Table className={cn("w-full", tableClassName)}>
             <TableHeader className="bg-gray-50 dark:bg-gray-900 sticky top-0 z-10">

@@ -183,22 +183,6 @@ export default function CustomersPage() {
     // TODO: Implement filter functionality
   };
 
-  // Function to format date with day, month, year
-  const formatDate = (dateString: string) => {
-    if (!dateString) return 'N/A';
-    
-    try {
-      const date = new Date(dateString);
-      return date.toLocaleDateString('en-GB', {
-        day: '2-digit',
-        month: '2-digit', 
-        year: 'numeric'
-      });
-    } catch (error) {
-      return 'Invalid Date';
-    }
-  };
-
   // Transform clients data for the table
   const transformedClients = clients.map(client => ({
     ...client,
@@ -223,7 +207,7 @@ export default function CustomersPage() {
     contact_person: client.contact_person || 'N/A',
     phone: client.phone || 'N/A',
     mobile: client.mobile || 'N/A',
-    created_at: formatDate(client.created_at),
+    created_at: client.created_at, // Let DataTable format it
   }));
 
   // Error display component
@@ -300,20 +284,22 @@ export default function CustomersPage() {
             <Breadcrumb items={breadcrumbItems} />
 
             {/* Header */}
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Customers Management</h1>
-              <p className="text-gray-600 dark:text-gray-400">Manage your customer database</p>
-            </div>
-            
-            {/* Create Customer Button */}
-            <div className="flex justify-end">
-              <Button
-                onClick={handleCreateCustomer}
-                className="bg-orange-600 hover:bg-orange-700 text-white flex items-center space-x-2"
-              >
-                <PlusIcon className="h-4 w-4" />
-                <span>Add New Client</span>
-              </Button>
+            <div className="flex items-start justify-between">
+              <div className="flex-1">
+                <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Customers Management</h1>
+                <p className="text-gray-600 dark:text-gray-400">Manage your customer database</p>
+              </div>
+              
+              {/* Create Customer Button */}
+              <div className="flex-shrink-0 ml-6">
+                <Button
+                  onClick={handleCreateCustomer}
+                  className="bg-orange-600 hover:bg-orange-700 text-white flex items-center space-x-2"
+                >
+                  <PlusIcon className="h-4 w-4" />
+                  <span>Add New Client</span>
+                </Button>
+              </div>
             </div>
 
             {/* Data Table */}

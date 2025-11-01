@@ -8,7 +8,7 @@ import { Breadcrumb } from '@/components/ui/breadcrumb';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeftIcon, EditIcon, TrashIcon, UserIcon, PhoneIcon, MailIcon, BuildingIcon, CalendarIcon, TagIcon, FileTextIcon, HashIcon, BriefcaseIcon, HomeIcon, DollarSignIcon, MapPinIcon } from '@/components/ui/icons';
+import { ArrowLeftIcon, EditIcon, TrashIcon, UserIcon, PhoneIcon, MailIcon, BuildingIcon, CalendarIcon, TagIcon, FileTextIcon, HashIcon, BriefcaseIcon, HomeIcon, DollarSignIcon, MapPinIcon, UsersIcon, BoardIcon, StarIcon } from '@/components/ui/icons';
 import { 
   AlertDialog,
   AlertDialogAction,
@@ -308,10 +308,65 @@ export default function LeadDetailsPage({ params }: LeadDetailsPageProps) {
               </div>
             </div>
 
+            {/* Quick Stats */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+              <Card className="dark:bg-gray-800 dark:border-gray-700">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Status</p>
+                      <Badge className={getStatusBadgeColor(lead.status)}>
+                        {lead.status.replace('_', ' ').toUpperCase()}
+                      </Badge>
+                    </div>
+                    <TagIcon className="h-8 w-8 text-gray-400" />
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="dark:bg-gray-800 dark:border-gray-700">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Priority</p>
+                      <Badge className={getPriorityBadgeColor(lead.priority)}>
+                        {lead.priority.toUpperCase()}
+                      </Badge>
+                    </div>
+                    <StarIcon className="h-8 w-8 text-gray-400" />
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="dark:bg-gray-800 dark:border-gray-700">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Meetings</p>
+                      <p className="text-2xl font-bold text-gray-900 dark:text-white">{lead.meetings?.length || 0}</p>
+                    </div>
+                    <UsersIcon className="h-8 w-8 text-gray-400" />
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="dark:bg-gray-800 dark:border-gray-700">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Quotations</p>
+                      <p className="text-2xl font-bold text-gray-900 dark:text-white">{lead.quotations?.length || 0}</p>
+                    </div>
+                    <FileTextIcon className="h-8 w-8 text-gray-400" />
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
             {/* Main Content */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               {/* Basic Information */}
-              <div className="lg:col-span-2">
+              <div className="lg:col-span-2 space-y-6">
                 <Card className="dark:bg-gray-800 dark:border-gray-700">
                   <CardHeader>
                     <CardTitle className="dark:text-white flex items-center gap-2">
@@ -576,39 +631,45 @@ export default function LeadDetailsPage({ params }: LeadDetailsPageProps) {
 
               {/* Status and Metadata */}
               <div className="space-y-6">
-                {/* Status Card */}
+                {/* Lead Summary Card */}
                 <Card className="dark:bg-gray-800 dark:border-gray-700">
                   <CardHeader>
                     <CardTitle className="dark:text-white flex items-center gap-2">
                       <TagIcon className="h-5 w-5" />
-                      Status
+                      Lead Summary
                     </CardTitle>
                   </CardHeader>
-                  <CardContent>
+                  <CardContent className="space-y-4">
                     <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium text-gray-500 dark:text-gray-400">Lead Status</span>
+                      <span className="text-sm font-medium text-gray-500 dark:text-gray-400">Status</span>
                       <Badge className={getStatusBadgeColor(lead.status)}>
                         {lead.status.replace('_', ' ').toUpperCase()}
                       </Badge>
                     </div>
-                  </CardContent>
-                </Card>
-
-                {/* Priority Card */}
-                <Card className="dark:bg-gray-800 dark:border-gray-700">
-                  <CardHeader>
-                    <CardTitle className="dark:text-white flex items-center gap-2">
-                      <TagIcon className="h-5 w-5" />
-                      Priority
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
                     <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium text-gray-500 dark:text-gray-400">Lead Priority</span>
+                      <span className="text-sm font-medium text-gray-500 dark:text-gray-400">Priority</span>
                       <Badge className={getPriorityBadgeColor(lead.priority)}>
                         {lead.priority.toUpperCase()}
                       </Badge>
                     </div>
+                    {lead.source && (
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-medium text-gray-500 dark:text-gray-400">Source</span>
+                        <Badge className={getSourceBadgeColor(lead.source)}>
+                          {lead.source.replace('_', ' ').toUpperCase()}
+                        </Badge>
+                      </div>
+                    )}
+                    {lead.assigned_employee && (
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-medium text-gray-500 dark:text-gray-400">Assigned To</span>
+                        <div className="flex items-center space-x-2">
+                          <span className="text-sm font-medium text-gray-900 dark:text-white">
+                            {lead.assigned_employee.name}
+                          </span>
+                        </div>
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
 
@@ -674,6 +735,291 @@ export default function LeadDetailsPage({ params }: LeadDetailsPageProps) {
                     </div>
                   </CardContent>
                 </Card>
+
+                {/* Client Information */}
+                {lead.client && (
+                  <Card className="dark:bg-gray-800 dark:border-gray-700">
+                    <CardHeader>
+                      <CardTitle className="dark:text-white flex items-center gap-2">
+                        <UserIcon className="h-5 w-5" />
+                        Client Information
+                      </CardTitle>
+                      <CardDescription className="dark:text-gray-400">
+                        Information about the converted client
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <span className="text-sm font-medium text-gray-500 dark:text-gray-400">Client Name</span>
+                          <p className="text-lg font-semibold text-gray-900 dark:text-white">
+                            {lead.client.name}
+                          </p>
+                        </div>
+                        <div className="space-y-2">
+                          <span className="text-sm font-medium text-gray-500 dark:text-gray-400">Client ID</span>
+                          <p className="text-lg font-semibold text-gray-900 dark:text-white">
+                            {lead.client.id}
+                          </p>
+                        </div>
+                        <div className="space-y-2">
+                          <span className="text-sm font-medium text-gray-500 dark:text-gray-400">Status</span>
+                          <Badge className={lead.client.status === 'active' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'}>
+                            {lead.client.status.toUpperCase()}
+                          </Badge>
+                        </div>
+                        <div className="space-y-2">
+                          <span className="text-sm font-medium text-gray-500 dark:text-gray-400">Created Date</span>
+                          <p className="text-sm text-gray-700 dark:text-gray-300">
+                            {new Date(lead.client.created_at).toLocaleDateString('en-US', {
+                              year: 'numeric',
+                              month: 'long',
+                              day: 'numeric'
+                            })}
+                          </p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Meetings */}
+                {lead.meetings && lead.meetings.length > 0 && (
+                  <Card className="dark:bg-gray-800 dark:border-gray-700">
+                    <CardHeader className="pb-3">
+                      <CardTitle className="dark:text-white flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <UsersIcon className="h-5 w-5 text-blue-600" />
+                          <span>Meetings</span>
+                          <Badge variant="secondary" className="ml-2">{lead.meetings.length}</Badge>
+                        </div>
+                        <Button variant="outline" size="sm">
+                          View All
+                        </Button>
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                      {lead.meetings.slice(0, 3).map((meeting) => (
+                        <div key={meeting.id} className="group p-4 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-600 transition-colors">
+                          <div className="flex items-start justify-between">
+                            <div className="flex-1 min-w-0">
+                              <h4 className="font-semibold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                                {meeting.title}
+                              </h4>
+                              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1 line-clamp-2">
+                                {meeting.description}
+                              </p>
+                              <div className="mt-3 flex flex-wrap gap-3 text-xs text-gray-500 dark:text-gray-400">
+                                <span className="flex items-center gap-1 bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">
+                                  <CalendarIcon className="h-3 w-3" />
+                                  {new Date(meeting.meeting_date).toLocaleDateString('en-US')}
+                                </span>
+                                <span className="flex items-center gap-1 bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">
+                                  <BoardIcon className="h-3 w-3" />
+                                  {meeting.duration_minutes}m
+                                </span>
+                                <span className="flex items-center gap-1 bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">
+                                  <MapPinIcon className="h-3 w-3" />
+                                  {meeting.location || 'Online'}
+                                </span>
+                              </div>
+                            </div>
+                            <div className="flex flex-col items-end gap-2 ml-4">
+                              <Badge className={
+                                meeting.status === 'completed' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' :
+                                meeting.status === 'cancelled' ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200' :
+                                meeting.status === 'scheduled' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' :
+                                'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
+                              }>
+                                {meeting.status.toUpperCase()}
+                              </Badge>
+                              <Badge variant="outline" className="text-xs">
+                                {meeting.meeting_type.replace('_', ' ')}
+                              </Badge>
+                            </div>
+                          </div>
+                          {meeting.outcomes && meeting.outcomes.length > 0 && (
+                            <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-600">
+                              <h5 className="text-xs font-medium text-gray-700 dark:text-gray-300 mb-2">Key Outcomes:</h5>
+                              <div className="flex flex-wrap gap-1">
+                                {meeting.outcomes.slice(0, 2).map((outcome, outcomeIndex) => (
+                                  <span key={outcomeIndex} className="text-xs bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-2 py-1 rounded">
+                                    {outcome.length > 30 ? outcome.substring(0, 30) + '...' : outcome}
+                                  </span>
+                                ))}
+                                {meeting.outcomes.length > 2 && (
+                                  <span className="text-xs text-gray-500 dark:text-gray-400">
+                                    +{meeting.outcomes.length - 2} more
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                      {lead.meetings.length > 3 && (
+                        <div className="text-center pt-2">
+                          <Button variant="ghost" size="sm" className="text-blue-600 hover:text-blue-700">
+                            View {lead.meetings.length - 3} more meetings
+                          </Button>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Quotations */}
+                {lead.quotations && lead.quotations.length > 0 && (
+                  <Card className="dark:bg-gray-800 dark:border-gray-700">
+                    <CardHeader className="pb-3">
+                      <CardTitle className="dark:text-white flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <FileTextIcon className="h-5 w-5 text-green-600" />
+                          <span>Quotations</span>
+                          <Badge variant="secondary" className="ml-2">{lead.quotations.length}</Badge>
+                        </div>
+                        <Button variant="outline" size="sm">
+                          View All
+                        </Button>
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                      {lead.quotations.slice(0, 3).map((quotation) => (
+                        <div key={quotation.id} className="group p-4 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-green-300 dark:hover:border-green-600 transition-colors">
+                          <div className="flex items-start justify-between">
+                            <div className="flex-1 min-w-0">
+                              <h4 className="font-semibold text-gray-900 dark:text-white group-hover:text-green-600 dark:group-hover:text-green-400 transition-colors">
+                                {quotation.title}
+                              </h4>
+                              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">#{quotation.quotation_number}</p>
+                              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1 line-clamp-2">
+                                {quotation.description}
+                              </p>
+                              <div className="mt-3 grid grid-cols-2 gap-3 text-xs">
+                                <div className="bg-gray-50 dark:bg-gray-700 p-2 rounded">
+                                  <span className="text-gray-500 dark:text-gray-400">Total:</span>
+                                  <span className="ml-1 font-semibold text-gray-900 dark:text-white">
+                                    {quotation.currency} {parseFloat(quotation.total_amount).toLocaleString()}
+                                  </span>
+                                </div>
+                                <div className="bg-gray-50 dark:bg-gray-700 p-2 rounded">
+                                  <span className="text-gray-500 dark:text-gray-400">Valid Until:</span>
+                                  <span className="ml-1 font-medium text-gray-900 dark:text-white">
+                                    {new Date(quotation.valid_until).toLocaleDateString('en-US')}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                            <div className="flex flex-col items-end gap-2 ml-4">
+                              <Badge className={
+                                quotation.status === 'accepted' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' :
+                                quotation.status === 'rejected' ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200' :
+                                quotation.status === 'sent' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' :
+                                quotation.status === 'expired' ? 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200' :
+                                'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
+                              }>
+                                {quotation.status.toUpperCase()}
+                              </Badge>
+                              <span className="text-xs text-gray-500 dark:text-gray-400">
+                                {new Date(quotation.created_at).toLocaleDateString('en-US')}
+                              </span>
+                            </div>
+                          </div>
+                          <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-600">
+                            <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400">
+                              <span>Subtotal: {quotation.currency} {parseFloat(quotation.subtotal).toLocaleString()}</span>
+                              <span>Tax: {quotation.tax_rate}%</span>
+                              <span>Discount: {quotation.discount_rate}%</span>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                      {lead.quotations.length > 3 && (
+                        <div className="text-center pt-2">
+                          <Button variant="ghost" size="sm" className="text-green-600 hover:text-green-700">
+                            View {lead.quotations.length - 3} more quotations
+                          </Button>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Contracts */}
+                {lead.contracts && lead.contracts.length > 0 && (
+                  <Card className="dark:bg-gray-800 dark:border-gray-700">
+                    <CardHeader className="pb-3">
+                      <CardTitle className="dark:text-white flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <FileTextIcon className="h-5 w-5 text-purple-600" />
+                          <span>Contracts</span>
+                          <Badge variant="secondary" className="ml-2">{lead.contracts.length}</Badge>
+                        </div>
+                        <Button variant="outline" size="sm">
+                          View All
+                        </Button>
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                      {lead.contracts.slice(0, 3).map((contract) => (
+                        <div key={contract.id} className="group p-4 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-purple-300 dark:hover:border-purple-600 transition-colors">
+                          <div className="flex items-start justify-between">
+                            <div className="flex-1 min-w-0">
+                              <h4 className="font-semibold text-gray-900 dark:text-white group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">
+                                {contract.title}
+                              </h4>
+                              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">#{contract.contract_number}</p>
+                              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1 line-clamp-2">
+                                {contract.description}
+                              </p>
+                              <div className="mt-3 grid grid-cols-2 gap-3 text-xs">
+                                <div className="bg-gray-50 dark:bg-gray-700 p-2 rounded">
+                                  <span className="text-gray-500 dark:text-gray-400">Value:</span>
+                                  <span className="ml-1 font-semibold text-gray-900 dark:text-white">
+                                    {contract.currency} {parseFloat(contract.value).toLocaleString()}
+                                  </span>
+                                </div>
+                                <div className="bg-gray-50 dark:bg-gray-700 p-2 rounded">
+                                  <span className="text-gray-500 dark:text-gray-400">Duration:</span>
+                                  <span className="ml-1 font-medium text-gray-900 dark:text-white">
+                                    {Math.ceil((new Date(contract.end_date).getTime() - new Date(contract.start_date).getTime()) / (1000 * 60 * 60 * 24))} days
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                            <div className="flex flex-col items-end gap-2 ml-4">
+                              <Badge className={
+                                contract.status === 'active' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' :
+                                contract.status === 'completed' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' :
+                                contract.status === 'cancelled' ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200' :
+                                contract.status === 'expired' ? 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200' :
+                                'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
+                              }>
+                                {contract.status.toUpperCase()}
+                              </Badge>
+                              <span className="text-xs text-gray-500 dark:text-gray-400">
+                                {new Date(contract.created_at).toLocaleDateString('en-US')}
+                              </span>
+                            </div>
+                          </div>
+                          <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-600">
+                            <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400">
+                              <span>Start: {new Date(contract.start_date).toLocaleDateString('en-US')}</span>
+                              <span>End: {new Date(contract.end_date).toLocaleDateString('en-US')}</span>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                      {lead.contracts.length > 3 && (
+                        <div className="text-center pt-2">
+                          <Button variant="ghost" size="sm" className="text-purple-600 hover:text-purple-700">
+                            View {lead.contracts.length - 3} more contracts
+                          </Button>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                )}
 
                 {/* Notes */}
                 {lead.notes && (

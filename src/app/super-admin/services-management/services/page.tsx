@@ -144,7 +144,8 @@ export default function ServicesPage() {
     department: service.department?.name || 'N/A',
     base_price: `${service.base_price} ${service.currency}`,
     delivery_time_days: `${service.delivery_time_days} days`,
-    created_at: new Date(service.created_at).toLocaleDateString('ar-SA'),
+    // Pass the raw date string to let DataTable's formatDate handle it
+    created_at: service.created_at,
   }));
 
   // Error display component
@@ -247,20 +248,22 @@ export default function ServicesPage() {
             <Breadcrumb items={breadcrumbItems} />
 
             {/* Header */}
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Services Management</h1>
-              <p className="text-gray-600 dark:text-gray-400">Manage company services and offerings</p>
-            </div>
-            
-            {/* Create Service Button */}
-            <div className="flex justify-end">
-              <Button
-                onClick={handleCreateService}
-                className="bg-orange-600 hover:bg-orange-700 text-white flex items-center space-x-2"
-              >
-                <PlusIcon className="h-4 w-4" />
-                <span>Create Service</span>
-              </Button>
+            <div className="flex items-start justify-between">
+              <div className="flex-1">
+                <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Services Management</h1>
+                <p className="text-gray-600 dark:text-gray-400">Manage company services and offerings</p>
+              </div>
+              
+              {/* Create Service Button */}
+              <div className="flex-shrink-0 ml-6">
+                <Button
+                  onClick={handleCreateService}
+                  className="bg-orange-600 hover:bg-orange-700 text-white flex items-center space-x-2"
+                >
+                  <PlusIcon className="h-4 w-4" />
+                  <span>Create Service</span>
+                </Button>
+              </div>
             </div>
 
             {/* Data Table */}

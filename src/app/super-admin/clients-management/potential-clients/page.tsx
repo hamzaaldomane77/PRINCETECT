@@ -8,7 +8,7 @@ import { Breadcrumb } from '@/components/ui/breadcrumb';
 import { DataTable, Column, ActionButton } from '@/components/ui/data-table';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { EyeIcon, EditIcon, TrashIcon, PlusIcon, RefreshIcon } from '@/components/ui/icons';
+import { EyeIcon, EditIcon, TrashIcon, PlusIcon, RefreshIcon, UserCheckIcon } from '@/components/ui/icons';
 import { 
   AlertDialog,
   AlertDialogAction,
@@ -19,7 +19,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { useLeads, useDeleteLead } from '@/modules/leads';
+import { useLeads, useDeleteLead, useConvertLead } from '@/modules/leads';
 import { Lead } from '@/modules/leads/types';
 import { toast } from 'sonner';
 import { getImageUrl } from '@/lib/image-utils';
@@ -76,6 +76,8 @@ export default function PotentialClientsPage() {
   const [retryCount, setRetryCount] = useState(0);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [leadToDelete, setLeadToDelete] = useState<Lead | null>(null);
+  const [convertDialogOpen, setConvertDialogOpen] = useState(false);
+  const [leadToConvert, setLeadToConvert] = useState<Lead | null>(null);
   const router = useRouter();
   
   // Pagination state
@@ -104,6 +106,7 @@ export default function PotentialClientsPage() {
 
   // Mutations
   const deleteLeadMutation = useDeleteLead();
+  const convertLeadMutation = useConvertLead();
 
   const handleCreateLead = () => {
     router.push('/super-admin/clients-management/potential-clients/create');
@@ -128,6 +131,25 @@ export default function PotentialClientsPage() {
   const handleDeleteLead = (lead: Lead) => {
     setLeadToDelete(lead);
     setDeleteDialogOpen(true);
+  };
+
+  const handleConvertLead = (lead: Lead) => {
+    setLeadToConvert(lead);
+    setConvertDialogOpen(true);
+  };
+
+  const confirmConvert = async () => {
+    if (!leadToConvert) return;
+    
+    try {
+      await convertLeadMutation.mutateAsync(leadToConvert.id);
+      setConvertDialogOpen(false);
+      setLeadToConvert(null);
+      refetch(); // Refresh the data
+    } catch (error) {
+      console.error('Failed to convert lead:', error);
+      // Error is already handled by the mutation
+    }
   };
 
   const confirmDelete = async () => {
@@ -182,6 +204,13 @@ export default function PotentialClientsPage() {
       onClick: (lead: Lead) => {
         router.push(`/super-admin/clients-management/potential-clients/${lead.id}/edit`);
       }
+    },
+    {
+      icon: UserCheckIcon,
+      label: 'Convert to Client',
+      color: 'text-purple-600 dark:text-purple-400',
+      hoverColor: 'hover:bg-purple-100 dark:hover:bg-purple-900',
+      onClick: handleConvertLead
     },
     {
       icon: TrashIcon,
@@ -253,7 +282,7 @@ export default function PotentialClientsPage() {
     ) : '-',
     assigned_to: lead.assigned_employee ? lead.assigned_employee.name : 'Unassigned',
     city: lead.city?.name || '-',
-    created_at: new Date(lead.created_at).toLocaleDateString('ar-SA'),
+    created_at: lead.created_at, // Let DataTable format it
   }));
 
   // Error display component
@@ -451,6 +480,33 @@ export default function PotentialClientsPage() {
                 disabled={deleteLeadMutation.isPending}
               >
                 {deleteLeadMutation.isPending ? 'جاري الحذف...' : 'حذف العميل المحتمل'}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
+        {/* Convert Confirmation Dialog */}
+        <AlertDialog open={convertDialogOpen} onOpenChange={setConvertDialogOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle className="flex items-center gap-2">
+                <UserCheckIcon className="h-5 w-5 text-purple-600" />
+                Convert to Client
+              </AlertDialogTitle>
+              <AlertDialogDescription>
+                Are you sure you want to convert the lead &quot;{leadToConvert?.name}&quot; to a client?
+                <br />
+                <span className="text-purple-600 font-medium">This action will move the lead to the clients list.</span>
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={confirmConvert}
+                className="bg-purple-600 hover:bg-purple-700 text-white"
+                disabled={convertLeadMutation.isPending}
+              >
+                {convertLeadMutation.isPending ? 'Converting...' : 'Convert to Client'}
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>

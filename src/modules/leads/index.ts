@@ -17,5 +17,6 @@ export {
   useCreateLead, 
   useUpdateLead, 
   useDeleteLead,
+  useConvertLead,
   leadsQueryKeys 
 } from './hooks';

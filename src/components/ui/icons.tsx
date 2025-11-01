@@ -55,7 +55,9 @@ import {
   Code,
   Mail,
   Phone,
-  Check
+  Check,
+  File,
+  Radio
 } from 'lucide-react';
 
 export const HomeIcon = ({ className = "w-5 h-5" }: { className?: string }) => (
@@ -335,4 +337,16 @@ export const PhoneIcon = ({ className = "w-4 h-4" }: { className?: string }) => 
 
 export const CheckIcon = ({ className = "w-4 h-4" }: { className?: string }) => (
   <Check className={className} />
+);
+
+export const PdaDocumentsIcon = ({ className = "w-4 h-4" }: { className?: string }) => (
+  <File className={className} />
+);
+
+export const AidaFunnelsIcon = ({ className = "w-4 h-4" }: { className?: string }) => (
+  <TrendingUp className={className} />
+);
+
+export const MarketingChannelsIcon = ({ className = "w-4 h-4" }: { className?: string }) => (
+  <Radio className={className} />
 );

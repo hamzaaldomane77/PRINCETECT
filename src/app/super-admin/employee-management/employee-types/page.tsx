@@ -101,7 +101,6 @@ export default function EmployeeTypesPage() {
     { key: 'name', label: 'Employee Type Name', type: 'text', align: 'right' },
     { key: 'code', label: 'Code', type: 'text', align: 'center' },
     { key: 'description', label: 'Description', type: 'text', align: 'right' },
-    { key: 'is_active', label: 'Active', type: 'icon', align: 'center' },
     { key: 'notes', label: 'Notes', type: 'text', align: 'right' },
     { key: 'created_at', label: 'Created At', type: 'date', align: 'right' },
     { key: 'updated_at', label: 'Updated At', type: 'date', align: 'right' },
@@ -252,20 +251,22 @@ export default function EmployeeTypesPage() {
             <Breadcrumb items={breadcrumbItems} />
 
             {/* Header */}
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Employee Types Management</h1>
-              <p className="text-gray-600 dark:text-gray-400">Manage employee types and categories</p>
-            </div>
-            
-            {/* Create Employee Type Button */}
-            <div className="flex justify-end">
-              <Button
-                onClick={handleCreateEmployeeType}
-                className="bg-orange-600 hover:bg-orange-700 text-white flex items-center space-x-2"
-              >
-                <PlusIcon className="h-4 w-4" />
-                <span>Add New Employee Type</span>
-              </Button>
+            <div className="flex items-start justify-between">
+              <div className="flex-1">
+                <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Employee Types Management</h1>
+                <p className="text-gray-600 dark:text-gray-400">Manage employee types and categories</p>
+              </div>
+              
+              {/* Create Employee Type Button */}
+              <div className="flex-shrink-0 ml-6">
+                <Button
+                  onClick={handleCreateEmployeeType}
+                  className="bg-orange-600 hover:bg-orange-700 text-white flex items-center space-x-2"
+                >
+                  <PlusIcon className="h-4 w-4" />
+                  <span>Add New Employee Type</span>
+                </Button>
+              </div>
             </div>
 
             {/* Data Table */}

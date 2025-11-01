@@ -85,10 +85,10 @@ export default function CitiesPage() {
     { key: 'name', label: 'City Name', type: 'text', align: 'right' },
     { key: 'code', label: 'Code', type: 'text', align: 'right' },
     { key: 'country', label: 'Country', type: 'text', align: 'right' },
-    { key: 'notes', label: 'Notes', type: 'text', align: 'right' },
-    { key: 'is_active', label: 'Active', type: 'icon', align: 'center' },
-    { key: 'created_at', label: 'Created At', type: 'date', align: 'right' },
-    { key: 'actions', label: 'Actions', type: 'actions', align: 'center' }
+    { key: 'notes', label: 'Notes', type: 'text', align: 'right',width: '250px' },
+    { key: 'is_active', label: 'Active', type: 'icon', align: 'right',width: '50px' },
+    { key: 'created_at', label: 'Created At', type: 'date', align: 'right',width: '150px' },
+    { key: 'actions', label: 'Actions', type: 'actions', align: 'center' ,width: '60px' }
   ];
 
   // Define action buttons
@@ -241,20 +241,22 @@ export default function CitiesPage() {
             <Breadcrumb items={breadcrumbItems} />
 
             {/* Header */}
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Cities Management</h1>
-              <p className="text-gray-600 dark:text-gray-400">Manage cities and locations</p>
-            </div>
-            
-            {/* Create City Button */}
-            <div className="flex justify-end">
-              <Button
-                onClick={handleCreateCity}
-                className="bg-orange-600 hover:bg-orange-700 text-white flex items-center space-x-2"
-              >
-                <PlusIcon className="h-4 w-4" />
-                <span>Create City</span>
-              </Button>
+            <div className="flex items-start justify-between">
+              <div className="flex-1">
+                <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Cities Management</h1>
+                <p className="text-gray-600 dark:text-gray-400">Manage cities and locations</p>
+              </div>
+              
+              {/* Create City Button */}
+              <div className="flex-shrink-0 ml-6">
+                <Button
+                  onClick={handleCreateCity}
+                  className="bg-orange-600 hover:bg-orange-700 text-white flex items-center space-x-2"
+                >
+                  <PlusIcon className="h-4 w-4" />
+                  <span>Create City</span>
+                </Button>
+              </div>
             </div>
 
             {/* Data Table */}

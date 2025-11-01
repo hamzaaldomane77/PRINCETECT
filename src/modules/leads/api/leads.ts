@@ -32,8 +32,8 @@ export class LeadsApi {
     return await apiClient.get<LeadsResponse>(url);
   }
 
-  static async getLead(id: number): Promise<{ success: boolean; data: Lead }> {
-    return await apiClient.get<{ success: boolean; data: Lead }>(`${this.baseUrl}/${id}`);
+  static async getLead(id: number): Promise<{ success: boolean; data: Lead; message: string }> {
+    return await apiClient.get<{ success: boolean; data: Lead; message: string }>(`${this.baseUrl}/${id}`);
   }
 
   static async createLead(data: CreateLeadRequest | FormData): Promise<{ success: boolean; data: Lead }> {
@@ -76,5 +76,9 @@ export class LeadsApi {
 
   static async deleteLead(id: number): Promise<{ success: boolean; message: string }> {
     return await apiClient.delete<{ success: boolean; message: string }>(`${this.baseUrl}/${id}`);
+  }
+
+  static async convertLead(id: number): Promise<{ success: boolean; message: string }> {
+    return await apiClient.post<{ success: boolean; message: string }>(`${this.baseUrl}/${id}/convert`);
   }
 }

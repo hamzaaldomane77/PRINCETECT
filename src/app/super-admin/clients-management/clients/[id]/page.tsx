@@ -177,22 +177,7 @@ export default function ClientDetailsPage() {
                 )}
                 <div>
                   <h1 className="text-3xl font-bold text-gray-900 dark:text-white">{client.name}</h1>
-                  <div className="flex items-center space-x-3 mt-2">
-                    {getStatusBadge(client.status)}
-                    <Badge variant={client.is_active ? "default" : "secondary"}>
-                      {client.is_active ? (
-                        <>
-                          <CheckIcon className="h-3 w-3 mr-1" />
-                          Active
-                        </>
-                      ) : (
-                        <>
-                          <XIcon className="h-3 w-3 mr-1" />
-                          Inactive
-                        </>
-                      )}
-                    </Badge>
-                  </div>
+                
                 </div>
               </div>
               
@@ -360,14 +345,7 @@ export default function ClientDetailsPage() {
                       <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Status</label>
                       <div className="mt-1">{getStatusBadge(client.status)}</div>
                     </div>
-                    <div>
-                      <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Active</label>
-                      <div className="mt-1">
-                        <Badge variant={client.is_active ? "default" : "secondary"}>
-                          {client.is_active ? 'Yes' : 'No'}
-                        </Badge>
-                      </div>
-                    </div>
+                    
                     <div>
                       <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Created At</label>
                       <p className="mt-1 text-sm text-gray-900 dark:text-white">{formatDate(client.created_at)}</p>

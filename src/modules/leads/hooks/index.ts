@@ -83,3 +83,20 @@ export function useDeleteLead() {
     },
   });
 }
+
+// Convert lead to client
+export function useConvertLead() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: number) => LeadsApi.convertLead(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: leadsQueryKeys.lists() });
+      toast.success('Lead converted to client successfully!');
+    },
+    onError: (error: any) => {
+      console.error('Error converting lead:', error);
+      toast.error(error?.response?.data?.message || 'Failed to convert lead to client');
+    },
+  });
+}
