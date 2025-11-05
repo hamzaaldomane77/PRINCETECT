@@ -5,28 +5,27 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
-import { useAuth } from '@/contexts/auth-context';
+import { useEmployeeAuth } from '@/contexts/employee-auth-context';
 import { LoginCredentials } from '@/types/auth';
 import Image from 'next/image';
 import toast, { Toaster } from 'react-hot-toast';
 import { EyeIcon, EyeOffIcon } from '@/components/ui/icons';
 
-export default function LoginForm() {
+export default function EmployeeLoginForm() {
   const [credentials, setCredentials] = useState<LoginCredentials>({ email: '', password: '' });
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
-  const { login, isLoading, isAuthenticated, user } = useAuth();
+  const { login, isLoading, isAuthenticated, user } = useEmployeeAuth();
   const router = useRouter();
 
   useEffect(() => {
     if (isAuthenticated && user) {
-      // Show success toast
       toast.success(`مرحباً ${user.name}! تم تسجيل الدخول بنجاح`);
       
-      // Redirect to super admin after a short delay
+      // Redirect to employee dashboard after a short delay
       setTimeout(() => {
-        router.push('/super-admin');
+        router.push('/employee/dashboard');
       }, 1000);
     }
   }, [isAuthenticated, router, user]);
@@ -35,16 +34,14 @@ export default function LoginForm() {
     e.preventDefault();
     setError('');
     
-    // Show loading toast
     const loadingToast = toast.loading('جاري تسجيل الدخول...');
     
     try {
       await login(credentials);
-      // Success toast will be shown in useEffect
       toast.dismiss(loadingToast);
     } catch (err) {
       toast.dismiss(loadingToast);
-      console.error('Login error:', err);
+      console.error('Employee login error:', err);
       
       if (err instanceof Error) {
         setError(err.message);
@@ -62,7 +59,14 @@ export default function LoginForm() {
       ...prev,
       [field]: value
     }));
-    // Clear error when user starts typing
+    if (error) setError('');
+  };
+
+  const fillDemoCredentials = () => {
+    setCredentials({
+      email: 'employee@demo.com',
+      password: 'employee123'
+    });
     if (error) setError('');
   };
 
@@ -107,10 +111,10 @@ export default function LoginForm() {
                 className="mx-auto mb-4"
               />
               <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-                تسجيل دخول المدير
+                تسجيل دخول الموظفين
               </h1>
               <p className="text-gray-600 dark:text-gray-400 mt-2">
-                أدخل بياناتك للوصول للوحة تحكم المدير
+                أدخل بياناتك للوصول لنظام الموظفين
               </p>
             </div>
 
@@ -127,14 +131,14 @@ export default function LoginForm() {
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>
                 <Label htmlFor="email" className="text-gray-700 dark:text-gray-300">
-                email
+                  البريد الإلكتروني
                 </Label>
                 <input
                   id="email"
                   type="email"
                   value={credentials.email}
                   onChange={(e) => handleInputChange('email', e.target.value)}
-                  className="mt-1 w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 dark:bg-gray-800 dark:text-white"
+                  className="mt-1 w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:text-white"
                   placeholder="أدخل بريدك الإلكتروني"
                   required
                   disabled={isLoading}
@@ -143,15 +147,16 @@ export default function LoginForm() {
 
               <div>
                 <Label htmlFor="password" className="text-gray-700 dark:text-gray-300">
-                password                </Label>
+                  كلمة المرور
+                </Label>
                 <div className="relative">
                   <input
                     id="password"
                     type={showPassword ? "text" : "password"}
                     value={credentials.password}
                     onChange={(e) => handleInputChange('password', e.target.value)}
-                    className="mt-1 w-full px-3 py-2 pr-10 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 dark:bg-gray-800 dark:text-white"
-                   
+                    className="mt-1 w-full px-3 py-2 pr-10 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:text-white"
+                    placeholder="أدخل كلمة المرور"
                     required
                     disabled={isLoading}
                   />
@@ -172,22 +177,43 @@ export default function LoginForm() {
 
               <Button
                 type="submit"
-                className="w-full bg-orange-600 hover:bg-orange-700 text-white py-2 px-4 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 disabled={isLoading}
               >
                 {isLoading ? 'جاري تسجيل الدخول...' : 'تسجيل الدخول'}
               </Button>
             </form>
 
-            {/* Link to Employee Login */}
+            {/* Demo Credentials */}
+            <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-md">
+              <div className="flex items-start justify-between mb-2">
+                <p className="text-sm font-semibold text-blue-900 dark:text-blue-100">
+                  🔐 بيانات الدخول التجريبية:
+                </p>
+                <button
+                  type="button"
+                  onClick={fillDemoCredentials}
+                  className="text-xs bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded transition-colors"
+                  disabled={isLoading}
+                >
+                  ملء تلقائي
+                </button>
+              </div>
+              <div className="text-sm text-blue-700 dark:text-blue-300 space-y-1">
+                <p>البريد الإلكتروني: <code className="bg-blue-100 dark:bg-blue-900/40 px-2 py-1 rounded">employee@demo.com</code></p>
+                <p>كلمة المرور: <code className="bg-blue-100 dark:bg-blue-900/40 px-2 py-1 rounded">employee123</code></p>
+              </div>
+            </div>
+
+            {/* Link to Super Admin Login */}
             <div className="mt-6 text-center">
               <p className="text-sm text-gray-600 dark:text-gray-400">
-                هل أنت موظف؟{' '}
+                هل أنت مدير؟{' '}
                 <a 
-                  href="/employee/login" 
-                  className="text-orange-600 hover:text-orange-700 dark:text-orange-400 dark:hover:text-orange-300 font-medium"
+                  href="/" 
+                  className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-medium"
                 >
-                  تسجيل دخول الموظفين
+                  تسجيل دخول المدير
                 </a>
               </p>
             </div>
@@ -196,4 +222,5 @@ export default function LoginForm() {
       </div>
     </>
   );
-} 
+}
+

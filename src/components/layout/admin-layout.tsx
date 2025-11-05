@@ -36,6 +36,9 @@ export function AdminLayout({ children }: AdminLayoutProps) {
       } else if (pathname.includes('/marketing-channels')) {
         // Handle Marketing Channels routes
         pageId = 'marketing-channels';
+      } else if (pathname.includes('/marketing-mixes')) {
+        // Handle Marketing Mixes routes
+        pageId = 'marketing-mixes';
       } else {
         // Handle nested routes
         const routeParts = route.split('/');
@@ -107,6 +110,9 @@ export function AdminLayout({ children }: AdminLayoutProps) {
         break;
       case 'marketing-channels':
         router.push('/super-admin/marketing-channels');
+        break;
+      case 'marketing-mixes':
+        router.push('/super-admin/marketing-mixes');
         break;
       default:
         router.push('/super-admin');

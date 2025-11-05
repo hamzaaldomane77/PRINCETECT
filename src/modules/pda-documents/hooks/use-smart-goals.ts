@@ -77,5 +77,5 @@ export function useDeleteSmartGoal(pdaDocumentId: number) {
 }
 
 // Re-export types for convenience
-export type { CreateSmartGoalRequest, UpdateSmartGoalRequest } from '../types/smart-goals';
+export type { SmartGoal, CreateSmartGoalRequest, UpdateSmartGoalRequest } from '../types/smart-goals';
 

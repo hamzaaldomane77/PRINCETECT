@@ -826,7 +826,7 @@ export default function EditContractPage({ params }: EditContractPageProps) {
                       <Label htmlFor="is_active">Active</Label>
                       <Switch
                         id="is_active"
-                        checked={formData.is_active}
+                        checked={formData.is_active ?? false}
                         onCheckedChange={(checked) => handleSwitchChange('is_active', checked)}
                       />
                     </div>

@@ -57,7 +57,8 @@ import {
   Phone,
   Check,
   File,
-  Radio
+  Radio,
+  LayoutGrid
 } from 'lucide-react';
 
 export const HomeIcon = ({ className = "w-5 h-5" }: { className?: string }) => (
@@ -349,4 +350,8 @@ export const AidaFunnelsIcon = ({ className = "w-4 h-4" }: { className?: string 
 
 export const MarketingChannelsIcon = ({ className = "w-4 h-4" }: { className?: string }) => (
   <Radio className={className} />
+);
+
+export const MarketingMixesIcon = ({ className = "w-4 h-4" }: { className?: string }) => (
+  <LayoutGrid className={className} />
 );

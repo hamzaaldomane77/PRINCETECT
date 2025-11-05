@@ -1,0 +1,103 @@
+'use client';
+
+import React, { useState, useEffect } from 'react';
+import { useRouter, usePathname } from 'next/navigation';
+import { EmployeeSidebar } from './employee-sidebar';
+import Header from './header';
+import { useEmployeeAuth } from '@/contexts/employee-auth-context';
+
+interface EmployeeLayoutProps {
+  children: React.ReactNode;
+}
+
+export function EmployeeLayout({ children }: EmployeeLayoutProps) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const { user, logout } = useEmployeeAuth();
+  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [activePage, setActivePage] = useState('dashboard');
+
+  useEffect(() => {
+    // Extract the page from pathname
+    const path = pathname.split('/').pop() || 'dashboard';
+    
+    // Map pathname to page id
+    let pageId = 'dashboard';
+    if (pathname.includes('/employee/')) {
+      const route = pathname.replace('/employee/', '');
+      if (route === '' || route === 'dashboard') {
+        pageId = 'dashboard';
+      } else if (pathname.includes('/my-tasks')) {
+        pageId = 'my-tasks';
+      } else if (pathname.includes('/my-meetings')) {
+        pageId = 'my-meetings';
+      } else if (pathname.includes('/my-clients')) {
+        pageId = 'my-clients';
+      } else {
+        pageId = route;
+      }
+    }
+    
+    setActivePage(pageId);
+  }, [pathname]);
+
+  const onPageChange = (page: string) => {
+    setActivePage(page);
+    switch (page) {
+      case 'dashboard':
+        router.push('/employee/dashboard');
+        break;
+      case 'my-tasks':
+        router.push('/employee/my-tasks');
+        break;
+      case 'my-meetings':
+        router.push('/employee/my-meetings');
+        break;
+      case 'my-clients':
+        router.push('/employee/my-clients');
+        break;
+      default:
+        router.push('/employee/dashboard');
+    }
+  };
+
+  // Redirect to login page if no user
+  useEffect(() => {
+    if (!user) {
+      router.push('/employee/login');
+    }
+  }, [user, router]);
+
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-gray-100 dark:bg-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-500 mx-auto mb-4"></div>
+          <p className="text-gray-600 dark:text-gray-400">جاري إعادة التوجيه لصفحة تسجيل الدخول...</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="h-screen bg-gray-100 dark:bg-gray-900 overflow-hidden">
+      <div className="flex h-full">
+        <EmployeeSidebar 
+          isCollapsed={isCollapsed}
+          onToggle={() => setIsCollapsed(!isCollapsed)}
+          onPageChange={onPageChange}
+          activePage={activePage}
+        />
+        
+        <div className="flex-1 flex flex-col h-full overflow-hidden">
+          <Header />
+          
+          <main className="flex-1 overflow-auto">
+            {children}
+          </main>
+        </div>
+      </div>
+    </div>
+  );
+}
+
