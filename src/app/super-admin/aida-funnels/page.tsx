@@ -1,14 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { SuperAdminOnly } from '@/components/auth/protected-route';
 import { AdminLayout } from '@/components/layout/admin-layout';
 import { Breadcrumb } from '@/components/ui/breadcrumb';
-import { DataTable, Column, ActionButton } from '@/components/ui/data-table';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { EyeIcon, EditIcon, TrashIcon, PlusIcon, MoreVerticalIcon } from '@/components/ui/icons';
+import { EyeIcon, EditIcon, TrashIcon, PlusIcon } from '@/components/ui/icons';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -19,7 +18,25 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { useAidaFunnels, useDeleteAidaFunnel, AidaFunnel } from '@/modules/aida-funnels';
+import { useAidaFunnels, useDeleteAidaFunnel, useReorderAidaFunnels, AidaFunnel } from '@/modules/aida-funnels';
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+import { GripVertical } from 'lucide-react';
 
 const stageColors: Record<string, string> = {
   attention: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300',
@@ -28,13 +45,99 @@ const stageColors: Record<string, string> = {
   action: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300',
 };
 
+// Sortable Row Component
+interface SortableRowProps {
+  funnel: AidaFunnel;
+  onView: (funnel: AidaFunnel) => void;
+  onEdit: (funnel: AidaFunnel) => void;
+  onDelete: (funnel: AidaFunnel) => void;
+  formatDate: (date: string) => string;
+}
+
+function SortableRow({ funnel, onView, onEdit, onDelete, formatDate }: SortableRowProps) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: funnel.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  return (
+    <tr
+      ref={setNodeRef}
+      style={style}
+      className={`border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 ${
+        isDragging ? 'z-50' : ''
+      }`}
+    >
+      <td className="px-4 py-3 text-center">
+        <button
+          {...attributes}
+          {...listeners}
+          className="cursor-grab active:cursor-grabbing text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+        >
+          <GripVertical className="h-5 w-5" />
+        </button>
+      </td>
+      <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100 text-center">{funnel.id}</td>
+      <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100 text-right">
+        Document #{funnel.pda_document_id}
+      </td>
+      <td className="px-4 py-3 text-center">
+        <Badge className={stageColors[funnel.stage.toLowerCase()] || stageColors.attention}>
+          {funnel.stage.charAt(0).toUpperCase() + funnel.stage.slice(1)}
+        </Badge>
+      </td>
+      <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100 text-right">
+        {funnel.description || 'N/A'}
+      </td>
+      <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100 text-center">{funnel.order}</td>
+      <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100 text-right">
+        {formatDate(funnel.created_at)}
+      </td>
+      <td className="px-4 py-3 text-center">
+        <div className="flex items-center justify-center gap-2">
+          <Button
+            onClick={() => onView(funnel)}
+            className="p-2 h-8 w-8 bg-blue-600 hover:bg-blue-700 text-white"
+            title="View Details"
+          >
+            <EyeIcon className="h-4 w-4" />
+          </Button>
+          <Button
+            onClick={() => onEdit(funnel)}
+            className="p-2 h-8 w-8 bg-orange-600 hover:bg-orange-700 text-white"
+            title="Edit"
+          >
+            <EditIcon className="h-4 w-4" />
+          </Button>
+          <Button
+            onClick={() => onDelete(funnel)}
+            className="p-2 h-8 w-8 bg-red-600 hover:bg-red-700 text-white"
+            title="Delete"
+          >
+            <TrashIcon className="h-4 w-4" />
+          </Button>
+        </div>
+      </td>
+    </tr>
+  );
+}
+
 export default function AidaFunnelsPage() {
-  const [selectedRows, setSelectedRows] = useState<number[]>([]);
   const [retryCount, setRetryCount] = useState(0);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [funnelToDelete, setFunnelToDelete] = useState<AidaFunnel | null>(null);
-  const [errorDialogOpen, setErrorDialogOpen] = useState(false);
-  const [errorMessage, setErrorMessage] = useState('');
+  const [sortedFunnels, setSortedFunnels] = useState<AidaFunnel[]>([]);
+  const [hasChanges, setHasChanges] = useState(false);
   const router = useRouter();
 
   const breadcrumbItems = [
@@ -58,6 +161,25 @@ export default function AidaFunnelsPage() {
 
   // Mutations
   const deleteFunnelMutation = useDeleteAidaFunnel();
+  const reorderFunnelsMutation = useReorderAidaFunnels();
+
+  // Sensors for drag and drop
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
+  // Update sorted funnels when data changes
+  useEffect(() => {
+    if (funnels.length > 0) {
+      // Sort by order field
+      const sorted = [...funnels].sort((a, b) => a.order - b.order);
+      setSortedFunnels(sorted);
+      setHasChanges(false);
+    }
+  }, [funnels]);
 
   const handleCreateFunnel = () => {
     router.push('/super-admin/aida-funnels/create');
@@ -95,6 +217,46 @@ export default function AidaFunnelsPage() {
     router.push(`/super-admin/aida-funnels/${funnel.id}/edit`);
   };
 
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (over && active.id !== over.id) {
+      setSortedFunnels((items) => {
+        const oldIndex = items.findIndex((item) => item.id === active.id);
+        const newIndex = items.findIndex((item) => item.id === over.id);
+
+        const newItems = arrayMove(items, oldIndex, newIndex);
+        setHasChanges(true);
+        return newItems;
+      });
+    }
+  };
+
+  const handleSaveOrder = async () => {
+    try {
+      // Prepare data for API
+      const reorderData = {
+        funnels: sortedFunnels.map((funnel, index) => ({
+          id: funnel.id,
+          order: index + 1, // Start order from 1
+        })),
+      };
+
+      await reorderFunnelsMutation.mutateAsync(reorderData);
+      setHasChanges(false);
+      refetch();
+    } catch (error) {
+      console.error('Error saving order:', error);
+    }
+  };
+
+  const handleCancelReorder = () => {
+    // Reset to original order
+    const sorted = [...funnels].sort((a, b) => a.order - b.order);
+    setSortedFunnels(sorted);
+    setHasChanges(false);
+  };
+
   // Function to format date
   const formatDate = (dateString: string) => {
     if (!dateString) return 'N/A';
@@ -110,73 +272,6 @@ export default function AidaFunnelsPage() {
       return 'Invalid Date';
     }
   };
-
-  // Define table columns
-  const columns: Column[] = [
-    { key: 'id', label: 'ID', type: 'text', width: '60px' },
-    { key: 'pda_document', label: 'PDA Document', type: 'text', align: 'right' },
-    { key: 'stage', label: 'Stage', type: 'text', align: 'center' },
-    { key: 'description', label: 'Description', type: 'text', align: 'right' },
-    { key: 'order', label: 'Order', type: 'text', align: 'center' },
-    { key: 'created_at', label: 'Created At', type: 'text', align: 'right' },
-    { key: 'actions', label: 'Actions', type: 'actions', align: 'center' , width: '30px' }
-  ];
-
-  const actions: ActionButton[] = [
-    {
-      icon: MoreVerticalIcon,
-      label: 'Actions',
-      color: 'text-gray-600 dark:text-gray-300',
-      hoverColor: 'hover:bg-gray-100 dark:hover:bg-gray-800',
-      onClick: () => {},
-      dropdownItems: [
-        {
-          icon: EyeIcon,
-          label: 'View Details',
-          onClick: handleViewFunnel
-        },
-        {
-          icon: EditIcon,
-          label: 'Edit Funnel',
-          onClick: handleEditFunnel
-        },
-        {
-          icon: TrashIcon,
-          label: 'Delete Funnel',
-          onClick: handleDeleteFunnel,
-          className: 'text-red-600 dark:text-red-400'
-        }
-      ]
-    }
-  ];
-
-  const handleSelectionChange = (selectedIds: number[]) => {
-    setSelectedRows(selectedIds);
-  };
-
-  const handleSearch = (query: string) => {
-    console.log('Search query:', query);
-    // TODO: Implement search functionality
-  };
-
-  const handleFilter = () => {
-    console.log('Filter clicked');
-    // TODO: Implement filter functionality
-  };
-
-  // Transform funnels data for the table
-  const transformedFunnels = funnels.map(funnel => ({
-    id: funnel.id,
-    pda_document: `Document #${funnel.pda_document_id}`,
-    stage: (
-      <Badge className={stageColors[funnel.stage.toLowerCase()] || stageColors.attention}>
-        {funnel.stage.charAt(0).toUpperCase() + funnel.stage.slice(1)}
-      </Badge>
-    ),
-    description: funnel.description || 'N/A',
-    order: funnel.order,
-    created_at: formatDate(funnel.created_at),
-  }));
 
   // Error display component
   const ErrorDisplay = ({ error, onRetry }: { error: Error; onRetry: () => void }) => (
@@ -269,24 +364,89 @@ export default function AidaFunnelsPage() {
               </div>
             </div>
 
-            {/* Data Table */}
+            {/* Save/Cancel Buttons */}
+            {hasChanges && (
+              <div className="flex items-center justify-end gap-3 p-4 bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-lg">
+                <span className="text-sm text-gray-600 dark:text-gray-400">
+                  You have unsaved changes to the order
+                </span>
+                <Button
+                  onClick={handleCancelReorder}
+                  className="bg-gray-500 hover:bg-gray-600 text-white"
+                  disabled={reorderFunnelsMutation.isPending}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={handleSaveOrder}
+                  className="bg-orange-600 hover:bg-orange-700 text-white"
+                  disabled={reorderFunnelsMutation.isPending}
+                >
+                  {reorderFunnelsMutation.isPending ? 'Saving...' : 'Save Order'}
+                </Button>
+              </div>
+            )}
+
+            {/* Sortable Table */}
             <div className="flex-1 flex flex-col min-h-0">
-              {funnels.length > 0 ? (
-                <DataTable
-                  data={transformedFunnels}
-                  columns={columns}
-                  actions={actions}
-                  searchable={true}
-                  searchPlaceholder="Search funnels..."
-                  filterable={false}
-                  selectable={true}
-                  pagination={true}
-                  defaultItemsPerPage={10}
-                  onSelectionChange={handleSelectionChange}
-                  onSearch={handleSearch}
-                  onFilter={handleFilter}
-                  className="flex-1 flex flex-col min-h-0"
-                />
+              {sortedFunnels.length > 0 ? (
+                <DndContext
+                  sensors={sensors}
+                  collisionDetection={closestCenter}
+                  onDragEnd={handleDragEnd}
+                >
+                  <div className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden flex-1 flex flex-col">
+                    <div className="overflow-x-auto flex-1">
+                      <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                        <thead className="bg-gray-50 dark:bg-gray-700 sticky top-0 z-10">
+                          <tr>
+                            <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider w-12">
+                              Drag
+                            </th>
+                            <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider w-16">
+                              ID
+                            </th>
+                            <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                              PDA Document
+                            </th>
+                            <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                              Stage
+                            </th>
+                            <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                              Description
+                            </th>
+                            <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider w-20">
+                              Order
+                            </th>
+                            <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                              Created At
+                            </th>
+                            <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider w-44">
+                              Actions
+                            </th>
+                          </tr>
+                        </thead>
+                        <SortableContext
+                          items={sortedFunnels.map((f) => f.id)}
+                          strategy={verticalListSortingStrategy}
+                        >
+                          <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                            {sortedFunnels.map((funnel) => (
+                              <SortableRow
+                                key={funnel.id}
+                                funnel={funnel}
+                                onView={handleViewFunnel}
+                                onEdit={handleEditFunnel}
+                                onDelete={handleDeleteFunnel}
+                                formatDate={formatDate}
+                              />
+                            ))}
+                          </tbody>
+                        </SortableContext>
+                      </table>
+                    </div>
+                  </div>
+                </DndContext>
               ) : (
                 <div className="flex-1 flex items-center justify-center">
                   <div className="text-center">
@@ -330,25 +490,6 @@ export default function AidaFunnelsPage() {
                 disabled={deleteFunnelMutation.isPending}
               >
                 {deleteFunnelMutation.isPending ? 'Deleting...' : 'Delete Funnel'}
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
-
-        {/* Error Dialog */}
-        <AlertDialog open={errorDialogOpen} onOpenChange={setErrorDialogOpen}>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle className="flex items-center gap-2 text-red-600">
-                ⚠️ Error
-              </AlertDialogTitle>
-              <AlertDialogDescription className="text-gray-700">
-                {errorMessage}
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogAction onClick={() => setErrorDialogOpen(false)}>
-                OK
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>

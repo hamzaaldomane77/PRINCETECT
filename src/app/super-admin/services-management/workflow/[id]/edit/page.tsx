@@ -65,9 +65,20 @@ export default function EditWorkflowPage() {
       await updateWorkflow.mutateAsync({ id: workflowId, data: formData });
       toast.success('Workflow updated successfully!');
       router.push('/super-admin/services-management/workflow');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to update workflow:', error);
-      toast.error('Failed to update workflow. Please try again.');
+      
+      // Check if error is due to duplicate default workflow
+      const errorMessage = error?.response?.data?.message || error?.message || '';
+      const isDuplicateDefaultError = 
+        errorMessage.includes('Duplicate entry') &&
+        errorMessage.includes('unique_default_workflow_per_service');
+      
+      if (isDuplicateDefaultError) {
+        toast.error('A default workflow already exists for this service. Please uncheck "Default Workflow" or edit the existing default workflow first.');
+      } else {
+        toast.error('Failed to update workflow. Please try again.');
+      }
     }
   };
 
@@ -220,13 +231,16 @@ export default function EditWorkflowPage() {
                 {/* Status Settings */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {/* Default Status */}
-                  <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                    <div>
+                  <div className="flex items-center justify-between p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
+                    <div className="flex-1">
                       <Label htmlFor="is_default" className="text-sm font-medium text-gray-700 dark:text-gray-300">
                         Default Workflow
                       </Label>
                       <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                         Set as default workflow for the service
+                      </p>
+                      <p className="text-xs text-yellow-600 dark:text-yellow-400 mt-2 font-medium">
+                        ⚠️ Note: Only one default workflow allowed per service
                       </p>
                     </div>
                     <Switch

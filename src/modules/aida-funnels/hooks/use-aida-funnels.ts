@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { AidaFunnelsApi } from '../api/aida-funnels';
-import { CreateAidaFunnelRequest, UpdateAidaFunnelRequest } from '../types';
+import { CreateAidaFunnelRequest, UpdateAidaFunnelRequest, ReorderAidaFunnelsRequest } from '../types';
 import { toast } from 'sonner';
 
 export const aidaFunnelsQueryKeys = {
@@ -71,6 +71,21 @@ export function useDeleteAidaFunnel() {
     onError: (error: any) => {
       console.error('Error deleting AIDA funnel:', error);
       toast.error(error?.response?.data?.message || 'Failed to delete AIDA funnel');
+    },
+  });
+}
+
+export function useReorderAidaFunnels() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (data: ReorderAidaFunnelsRequest) => AidaFunnelsApi.reorderAidaFunnels(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: aidaFunnelsQueryKeys.lists() });
+      toast.success('AIDA Funnels reordered successfully');
+    },
+    onError: (error: any) => {
+      console.error('Error reordering AIDA funnels:', error);
+      toast.error(error?.response?.data?.message || 'Failed to reorder AIDA funnels');
     },
   });
 }

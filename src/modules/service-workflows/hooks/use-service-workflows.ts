@@ -84,3 +84,14 @@ export const useServicesLookup = (q: string = '', active: number = 1) => {
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
 };
+
+export const useDuplicateServiceWorkflow = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: (id: number) => ServiceWorkflowsAPI.duplicateServiceWorkflow(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['service-workflows'] });
+    },
+  });
+};

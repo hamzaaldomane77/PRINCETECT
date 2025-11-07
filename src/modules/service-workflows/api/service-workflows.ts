@@ -46,7 +46,7 @@ export class ServiceWorkflowsAPI {
   }
 
   static async createServiceWorkflow(data: CreateServiceWorkflowRequest): Promise<ServiceWorkflow> {
-    const result = await apiClient.post<any>(API_BASE, data);
+    const result = await apiClient.post<any>(API_BASE, data as unknown as Record<string, unknown>);
     if (!result.success) {
       throw new Error('Failed to create service workflow');
     }
@@ -54,7 +54,7 @@ export class ServiceWorkflowsAPI {
   }
 
   static async updateServiceWorkflow(id: number, data: UpdateServiceWorkflowRequest): Promise<ServiceWorkflow> {
-    const result = await apiClient.put<{ success: boolean; data: ServiceWorkflow }>(`${API_BASE}/${id}`, data);
+    const result = await apiClient.put<any>(`${API_BASE}/${id}`, data as unknown as Record<string, unknown>);
     if (!result.success) {
       throw new Error('Failed to update service workflow');
     }
@@ -82,5 +82,17 @@ export class ServiceWorkflowsAPI {
       throw new Error('Failed to fetch services lookup');
     }
     return result.data.options;
+  }
+
+  static async duplicateServiceWorkflow(id: number): Promise<ServiceWorkflow> {
+    // Send is_default: false to avoid constraint violation
+    // Only one default workflow per service is allowed
+    const result = await apiClient.post<any>(`${API_BASE}/${id}/duplicate`, {
+      is_default: false
+    } as unknown as Record<string, unknown>);
+    if (!result.success) {
+      throw new Error('Failed to duplicate service workflow');
+    }
+    return result.data.workflow;
   }
 }

@@ -1,15 +1,20 @@
 'use client';
 
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-import { User, LoginCredentials, LoginResponse, AuthContextType } from '@/types/auth';
+import { EmployeeAuthAPI } from '@/modules/employee-auth';
+import type { 
+  EmployeeUser, 
+  EmployeeLoginCredentials, 
+  EmployeeAuthContextType 
+} from '@/modules/employee-auth';
 
 interface EmployeeAuthProviderProps {
   children: ReactNode;
 }
 
-const EmployeeAuthContext = createContext<AuthContextType | undefined>(undefined);
+const EmployeeAuthContext = createContext<EmployeeAuthContextType | undefined>(undefined);
 
-export const useEmployeeAuth = (): AuthContextType => {
+export const useEmployeeAuth = (): EmployeeAuthContextType => {
   const context = useContext(EmployeeAuthContext);
   if (context === undefined) {
     throw new Error('useEmployeeAuth must be used within an EmployeeAuthProvider');
@@ -18,7 +23,7 @@ export const useEmployeeAuth = (): AuthContextType => {
 };
 
 export const EmployeeAuthProvider: React.FC<EmployeeAuthProviderProps> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<EmployeeUser | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -33,10 +38,18 @@ export const EmployeeAuthProvider: React.FC<EmployeeAuthProviderProps> = ({ chil
         
         if (token && userData) {
           const user = JSON.parse(userData);
-          setUser(user);
-          setToken(token);
-          setIsAuthenticated(true);
-          console.log('Restored employee authentication from localStorage:', { user, token });
+          // Validate user data structure
+          if (user && user.id && user.email && user.full_name) {
+            setUser(user);
+            setToken(token);
+            setIsAuthenticated(true);
+            console.log('Restored employee authentication:', user.full_name);
+          } else {
+            console.warn('Invalid employee user data in localStorage');
+            // Clear invalid data
+            localStorage.removeItem('employee-auth-token');
+            localStorage.removeItem('employee-auth-user');
+          }
         }
       } catch (error) {
         console.error('Error parsing employee user data from localStorage:', error);
@@ -85,113 +98,34 @@ export const EmployeeAuthProvider: React.FC<EmployeeAuthProviderProps> = ({ chil
   };
 
   // Login function for employees
-  const login = async (credentials: LoginCredentials): Promise<void> => {
+  const login = async (credentials: EmployeeLoginCredentials): Promise<void> => {
     setIsLoading(true);
     
     try {
-      // Demo login credentials for testing (until backend is connected)
-      const DEMO_CREDENTIALS = {
-        email: 'employee@demo.com',
-        password: 'employee123'
-      };
-
-      // Check if using demo credentials
-      const isDemoLogin = credentials.email === DEMO_CREDENTIALS.email && 
-                         credentials.password === DEMO_CREDENTIALS.password;
-
-      if (isDemoLogin) {
-        // Simulate API delay
-        await new Promise(resolve => setTimeout(resolve, 1000));
-
-        // Create demo user data
-        const demoUser: User = {
-          id: 100,
-          email: 'employee@demo.com',
-          name: 'موظف تجريبي',
-          roles: ['employee'],
-          permissions: ['view_tasks', 'view_meetings', 'view_clients'],
-        };
-        const demoToken = 'demo-employee-token-' + Date.now();
-
-        // Store in state
-        setUser(demoUser);
-        setToken(demoToken);
-        setIsAuthenticated(true);
-        
-        // Store in localStorage with employee prefix
-        localStorage.setItem('employee-auth-token', demoToken);
-        localStorage.setItem('employee-auth-user', JSON.stringify(demoUser));
-        
-        console.log('Employee demo login successful:', { user: demoUser, token: demoToken });
-        return;
-      }
-
-      // Try real backend login
-      let response: Response;
+      console.log('Attempting employee login with email:', credentials.email);
       
-      try {
-        // Employee login endpoint - will be connected to backend later
-        console.log('Attempting employee login via proxy to:', 'employee/auth/login');
-        console.log('With credentials:', { email: credentials.email });
-        
-        response = await fetch('/api/proxy/login', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-          },
-          body: JSON.stringify({
-            ...credentials,
-            endpoint: 'employee/auth/login' // Different endpoint for employees
-          }),
-        });
-        
-        console.log('Employee login response received:', response.status, response.statusText);
-      } catch (fetchError) {
-        console.error('Fetch error details:', fetchError);
-        throw new Error('لا يمكن الاتصال بالخادم. استخدم البيانات التجريبية: employee@demo.com / employee123');
-      }
-
-      if (!response.ok) {
-        if (response.status === 401) {
-          throw new Error('البريد الإلكتروني أو كلمة المرور غير صحيحة. جرب: employee@demo.com / employee123');
-        } else if (response.status === 404) {
-          throw new Error('خادم تسجيل الدخول غير متاح. استخدم البيانات التجريبية: employee@demo.com / employee123');
-        } else if (response.status === 500) {
-          throw new Error('خطأ في الخادم، يرجى المحاولة لاحقاً');
-        } else if (response.status === 0) {
-          throw new Error('لا يمكن الاتصال بالخادم، تحقق من اتصال الإنترنت');
-        } else {
-          throw new Error(`فشل في تسجيل الدخول (${response.status})`);
-        }
-      }
-
-      const data: LoginResponse = await response.json();
+      // Call the new API
+      const response = await EmployeeAuthAPI.login(credentials);
       
-      if (data.success && data.data.user) {
-        const userData = data.data.user;
-        const authToken = data.data.token;
-        
-        // Store in state
-        setUser(userData);
-        setToken(authToken);
-        setIsAuthenticated(true);
-        
-        // Store in localStorage with employee prefix
-        localStorage.setItem('employee-auth-token', authToken);
-        localStorage.setItem('employee-auth-user', JSON.stringify(userData));
-        
-        console.log('Employee login successful:', { user: userData, token: authToken });
-      } else {
-        throw new Error('استجابة غير صحيحة من الخادم');
-      }
+      const userData = response.data.user;
+      const authToken = response.data.token;
+      
+      // Store in state
+      setUser(userData);
+      setToken(authToken);
+      setIsAuthenticated(true);
+      
+      // Store in localStorage with employee prefix
+      localStorage.setItem('employee-auth-token', authToken);
+      localStorage.setItem('employee-auth-user', JSON.stringify(userData));
+      
+      console.log('Employee login successful:', { 
+        user: userData.full_name, 
+        roles: userData.roles,
+        permissions: userData.permissions.length 
+      });
     } catch (error) {
       console.error('Employee login error:', error);
-      
-      if (error instanceof TypeError && error.message.includes('fetch')) {
-        throw new Error('خطأ في الاتصال بالخادم. استخدم البيانات التجريبية: employee@demo.com / employee123');
-      }
-      
       throw error;
     } finally {
       setIsLoading(false);
@@ -199,14 +133,25 @@ export const EmployeeAuthProvider: React.FC<EmployeeAuthProviderProps> = ({ chil
   };
 
   // Logout function for employees
-  const logout = (): void => {
-    setUser(null);
-    setToken(null);
-    setIsAuthenticated(false);
-    
-    // Clear localStorage with employee prefix
-    localStorage.removeItem('employee-auth-token');
-    localStorage.removeItem('employee-auth-user');
+  const logout = async (): Promise<void> => {
+    try {
+      // Call backend logout if token exists
+      if (token) {
+        await EmployeeAuthAPI.logout(token);
+      }
+    } catch (error) {
+      console.error('Logout API error:', error);
+      // Continue with local logout even if API call fails
+    } finally {
+      // Clear state
+      setUser(null);
+      setToken(null);
+      setIsAuthenticated(false);
+      
+      // Clear localStorage with employee prefix
+      localStorage.removeItem('employee-auth-token');
+      localStorage.removeItem('employee-auth-user');
+    }
   };
 
   // Function to get current token
@@ -219,7 +164,7 @@ export const EmployeeAuthProvider: React.FC<EmployeeAuthProviderProps> = ({ chil
     return !!token && isAuthenticated;
   };
 
-  const value: AuthContextType = {
+  const value: EmployeeAuthContextType = {
     user,
     token,
     isAuthenticated,

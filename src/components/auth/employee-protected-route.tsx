@@ -1,9 +1,8 @@
 'use client';
 
-import React, { ReactNode } from 'react';
+import React, { ReactNode, useEffect } from 'react';
 import { useEmployeeAuth } from '@/contexts/employee-auth-context';
 import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
 
 interface EmployeeProtectedRouteProps {
   children: ReactNode;

@@ -8,11 +8,11 @@ import { Breadcrumb } from '@/components/ui/breadcrumb';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { DataTable } from '@/components/ui/data-table';
+import { DataTable, Column, ActionButton } from '@/components/ui/data-table';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeftIcon, PlusIcon, EyeIcon, EditIcon, TrashIcon, WorkflowIcon } from '@/components/ui/icons';
-import { useWorkflowTasks, useDeleteWorkflowTask, useToggleWorkflowTaskStatus } from '@/modules/workflow-tasks';
+import { useWorkflowTasks, useDeleteWorkflowTask, useToggleWorkflowTaskStatus, useTaskTypesLookup } from '@/modules/workflow-tasks';
 import { useServiceWorkflow as useWorkflow } from '@/modules/service-workflows';
 import { toast } from 'sonner';
 
@@ -35,6 +35,9 @@ export default function WorkflowTasksPage() {
 
   // Fetch workflow details (which includes tasks)
   const { data: workflow, isLoading, error } = useWorkflow(workflowId);
+  
+  // Fetch task types for filter
+  const { data: taskTypes, isLoading: taskTypesLoading } = useTaskTypesLookup(workflowId);
   
   // Extract and filter tasks from workflow data
   const allTasks = workflow?.tasks || [];
@@ -105,99 +108,90 @@ export default function WorkflowTasksPage() {
       animation: 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-300',
       sound_design: 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300',
       review: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300',
+      research: 'bg-teal-100 text-teal-800 dark:bg-teal-900 dark:text-teal-300',
+      content_creation: 'bg-cyan-100 text-cyan-800 dark:bg-cyan-900 dark:text-cyan-300',
+      communication: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-300',
     };
     return colors[taskType] || 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300';
   };
 
-  const columns = [
+  // Transform tasks data for the table
+  const tableData = tasks.map(task => ({
+    ...task,
+    task_type_display: task.task_type.replace('_', ' '),
+    duration_display: `${task.estimated_duration_hours}h`,
+    required_display: task.is_required ? 'Required' : 'Optional',
+  }));
+
+  const columns: Column[] = [
     {
       key: 'order_sequence',
       label: 'Order',
-      type: 'text' as const,
-      render: (task: any) => (
-        <span className="font-medium text-gray-900 dark:text-white">
-          {task.order_sequence}
-        </span>
-      ),
+      type: 'text',
+      width: '80px',
+      align: 'center',
     },
     {
       key: 'name',
       label: 'Task Name',
-      type: 'text' as const,
-      render: (task: any) => (
-        <div>
-          <div className="font-medium text-gray-900 dark:text-white">{task.name}</div>
-          {task.description && (
-            <div className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-              {task.description}
-            </div>
-          )}
-        </div>
-      ),
+      type: 'text',
+      align: 'right',
     },
     {
-      key: 'task_type',
+      key: 'task_type_display',
       label: 'Type',
-      type: 'text' as const,
-      render: (task: any) => (
-        <Badge className={getTaskTypeColor(task.task_type)}>
-          {task.task_type.replace('_', ' ')}
-        </Badge>
-      ),
+      type: 'badge',
+      align: 'center',
+      badgeColors: {
+        'script writing': getTaskTypeColor('script_writing'),
+        'filming': getTaskTypeColor('filming'),
+        'editing': getTaskTypeColor('editing'),
+        'design': getTaskTypeColor('design'),
+        'voice over': getTaskTypeColor('voice_over'),
+        'animation': getTaskTypeColor('animation'),
+        'sound design': getTaskTypeColor('sound_design'),
+        'review': getTaskTypeColor('review'),
+        'research': getTaskTypeColor('research'),
+        'content creation': getTaskTypeColor('content_creation'),
+        'communication': getTaskTypeColor('communication'),
+      },
     },
     {
-      key: 'estimated_duration_hours',
+      key: 'duration_display',
       label: 'Duration (Hours)',
-      type: 'text' as const,
-      render: (task: any) => (
-        <span className="text-gray-900 dark:text-white">
-          {task.estimated_duration_hours}h
-        </span>
-      ),
+      type: 'text',
+      align: 'center',
     },
     {
-      key: 'is_required',
+      key: 'required_display',
       label: 'Required',
-      type: 'text' as const,
-      render: (task: any) => (
-        <Badge variant={task.is_required ? 'default' : 'secondary'}>
-          {task.is_required ? 'Required' : 'Optional'}
-        </Badge>
-      ),
+      type: 'badge',
+      align: 'center',
+      badgeColors: {
+        'Required': 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300',
+        'Optional': 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300',
+      },
     },
     {
       key: 'actions',
       label: 'Actions',
-      type: 'actions' as const,
-      render: (task: any) => (
-        <div className="flex items-center gap-2">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => router.push(`/super-admin/services-management/workflow/${workflowId}/tasks/${task.id}`)}
-            className="text-blue-600 hover:text-blue-800 hover:bg-blue-100 dark:text-blue-400 dark:hover:text-blue-300 dark:hover:bg-blue-900"
-          >
-            <EyeIcon className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => router.push(`/super-admin/services-management/workflow/${workflowId}/tasks/${task.id}/edit`)}
-            className="text-orange-600 hover:text-orange-800 hover:bg-orange-100 dark:text-orange-400 dark:hover:text-orange-300 dark:hover:bg-orange-900"
-          >
-            <EditIcon className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => handleDelete(task.id)}
-            className="text-red-600 hover:text-red-800 hover:bg-red-100 dark:text-red-400 dark:hover:text-red-300 dark:hover:bg-red-900"
-          >
-            <TrashIcon className="h-4 w-4" />
-          </Button>
-        </div>
-      ),
+      type: 'actions',
+      align: 'center',
+      width: '80px',
     },
+  ];
+
+  // Define action buttons
+  const actions: ActionButton[] = [
+    {
+      icon: TrashIcon,
+      label: 'Delete Task',
+      color: 'text-red-600 dark:text-red-400',
+      hoverColor: 'hover:bg-red-100 dark:hover:bg-red-900',
+      onClick: (task: any) => {
+        handleDelete(task.id);
+      }
+    }
   ];
 
   if (isLoading) {
@@ -289,20 +283,17 @@ export default function WorkflowTasksPage() {
                       className="max-w-sm"
                     />
                   </div>
-                  <Select value={taskTypeFilter} onValueChange={handleTaskTypeFilter}>
+                  <Select value={taskTypeFilter} onValueChange={handleTaskTypeFilter} disabled={taskTypesLoading}>
                     <SelectTrigger className="w-[180px]">
-                      <SelectValue placeholder="Filter by type" />
+                      <SelectValue placeholder={taskTypesLoading ? "Loading types..." : "Filter by type"} />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">All Types</SelectItem>
-                      <SelectItem value="script_writing">Script Writing</SelectItem>
-                      <SelectItem value="filming">Filming</SelectItem>
-                      <SelectItem value="editing">Editing</SelectItem>
-                      <SelectItem value="design">Design</SelectItem>
-                      <SelectItem value="voice_over">Voice Over</SelectItem>
-                      <SelectItem value="animation">Animation</SelectItem>
-                      <SelectItem value="sound_design">Sound Design</SelectItem>
-                      <SelectItem value="review">Review</SelectItem>
+                      {taskTypes?.map((type) => (
+                        <SelectItem key={type.value} value={type.value}>
+                          {type.label.replace('_', ' ')}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                   <Select value={requiredFilter} onValueChange={handleRequiredFilter}>
@@ -329,8 +320,14 @@ export default function WorkflowTasksPage() {
             {/* Tasks Table */}
             <div className="bg-white dark:bg-gray-800 rounded-lg shadow">
               <DataTable
-                data={tasks}
+                data={tableData}
                 columns={columns}
+                actions={actions}
+                searchable={false}
+                filterable={false}
+                selectable={false}
+                pagination={true}
+                defaultItemsPerPage={10}
               />
             </div>
           </div>

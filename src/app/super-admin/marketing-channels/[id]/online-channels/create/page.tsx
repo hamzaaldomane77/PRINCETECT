@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { ArrowLeftIcon, SaveIcon } from '@/components/ui/icons';
 import {
   useCreateOnlineChannel,
@@ -24,7 +25,11 @@ export default function CreateOnlineChannelPage() {
 
   const [formData, setFormData] = useState<CreateOnlineChannelRequest>({
     platform: '',
-    main_goal: ''
+    main_goal: '',
+    pages: '',
+    type_of_content: '',
+    seo: '',
+    notes: ''
   });
 
   const breadcrumbItems = [
@@ -36,7 +41,7 @@ export default function CreateOnlineChannelPage() {
 
   const createMutation = useCreateOnlineChannel(marketingChannelId);
 
-  const handleInputChange = (field: keyof CreateOnlineChannelRequest, value: string) => {
+  const handleInputChange = (field: keyof CreateOnlineChannelRequest, value: string | null) => {
     setFormData(prev => ({
       ...prev,
       [field]: value
@@ -62,7 +67,7 @@ export default function CreateOnlineChannelPage() {
 
       await createMutation.mutateAsync(formData);
       toast.success('Online channel created successfully');
-      router.push(`/super-admin/marketing-channels/${marketingChannelId}/edit`);
+      router.push(`/super-admin/marketing-channels`);
     } catch (error) {
       console.error('Error creating online channel:', error);
       const errorMsg = (error as any)?.response?.data?.message || 'Failed to create online channel';
@@ -73,7 +78,7 @@ export default function CreateOnlineChannelPage() {
   };
 
   const handleCancel = () => {
-    router.push(`/super-admin/marketing-channels/${marketingChannelId}/edit`);
+    router.push(`/super-admin/marketing-channels`);
   };
 
   return (
@@ -124,6 +129,47 @@ export default function CreateOnlineChannelPage() {
                     onChange={(e) => handleInputChange('main_goal', e.target.value)}
                     placeholder="Enter main goal..."
                     required
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="pages">Pages</Label>
+                  <Input
+                    id="pages"
+                    value={formData.pages || ''}
+                    onChange={(e) => handleInputChange('pages', e.target.value)}
+                    placeholder="Enter pages (e.g., Home, About, Services)"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="type_of_content">Type of Content</Label>
+                  <Input
+                    id="type_of_content"
+                    value={formData.type_of_content || ''}
+                    onChange={(e) => handleInputChange('type_of_content', e.target.value)}
+                    placeholder="Enter type of content (e.g., Short Reels + Carousel Posts)"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="seo">SEO</Label>
+                  <Input
+                    id="seo"
+                    value={formData.seo || ''}
+                    onChange={(e) => handleInputChange('seo', e.target.value)}
+                    placeholder="Enter SEO keywords (e.g., digital marketing agency, branding)"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="notes">Notes</Label>
+                  <Textarea
+                    id="notes"
+                    value={formData.notes || ''}
+                    onChange={(e) => handleInputChange('notes', e.target.value)}
+                    placeholder="Enter notes (e.g., Prefer modern simple visual style)"
+                    rows={4}
                   />
                 </div>
 

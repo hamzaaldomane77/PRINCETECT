@@ -128,6 +128,10 @@ export default function PdaDocumentsPage() {
     router.push(`/super-admin/pda-documents/${document.id}/target-audiences`);
   };
 
+  const handleToneOfVoiceDocument = (document: PdaDocument) => {
+    router.push(`/super-admin/pda-documents/${document.id}/tone-of-voice`);
+  };
+
   // Define table columns
   const columns: Column[] = [
     { key: 'id', label: 'ID', type: 'text', width: '60px' },
@@ -200,6 +204,12 @@ export default function PdaDocumentsPage() {
           label: 'Target Audiences',
           onClick: handleTargetAudiencesDocument,
           className: 'text-cyan-600 dark:text-cyan-400'
+        },
+        {
+          icon: PlusIcon,
+          label: 'Tone of Voice',
+          onClick: handleToneOfVoiceDocument,
+          className: 'text-violet-600 dark:text-violet-400'
         },
         {
           icon: TrashIcon,

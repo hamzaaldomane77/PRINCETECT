@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { ArrowLeftIcon, SaveIcon } from '@/components/ui/icons';
 import {
   useCreateOfflineChannel,
@@ -24,7 +25,11 @@ export default function CreateOfflineChannelPage() {
 
   const [formData, setFormData] = useState<CreateOfflineChannelRequest>({
     type: '',
-    location: ''
+    location: '',
+    agency: '',
+    street: '',
+    type_of_content: '',
+    notes: ''
   });
 
   const breadcrumbItems = [
@@ -36,7 +41,7 @@ export default function CreateOfflineChannelPage() {
 
   const createMutation = useCreateOfflineChannel(marketingChannelId);
 
-  const handleInputChange = (field: keyof CreateOfflineChannelRequest, value: string) => {
+  const handleInputChange = (field: keyof CreateOfflineChannelRequest, value: string | null) => {
     setFormData(prev => ({
       ...prev,
       [field]: value
@@ -62,7 +67,7 @@ export default function CreateOfflineChannelPage() {
 
       await createMutation.mutateAsync(formData);
       toast.success('Offline channel created successfully');
-      router.push(`/super-admin/marketing-channels/${marketingChannelId}/edit`);
+      router.push(`/super-admin/marketing-channels`);
     } catch (error) {
       console.error('Error creating offline channel:', error);
       const errorMsg = (error as any)?.response?.data?.message || 'Failed to create offline channel';
@@ -73,7 +78,7 @@ export default function CreateOfflineChannelPage() {
   };
 
   const handleCancel = () => {
-    router.push(`/super-admin/marketing-channels/${marketingChannelId}/edit`);
+    router.push(`/super-admin/marketing-channels`);
   };
 
   return (
@@ -122,8 +127,49 @@ export default function CreateOfflineChannelPage() {
                     id="location"
                     value={formData.location}
                     onChange={(e) => handleInputChange('location', e.target.value)}
-                    placeholder="Enter location..."
+                    placeholder="Enter location (e.g., Riyadh)"
                     required
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="agency">Agency</Label>
+                  <Input
+                    id="agency"
+                    value={formData.agency || ''}
+                    onChange={(e) => handleInputChange('agency', e.target.value)}
+                    placeholder="Enter agency (e.g., XYZ Agency)"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="street">Street</Label>
+                  <Input
+                    id="street"
+                    value={formData.street || ''}
+                    onChange={(e) => handleInputChange('street', e.target.value)}
+                    placeholder="Enter street (e.g., King Fahad Road)"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="type_of_content">Type of Content</Label>
+                  <Input
+                    id="type_of_content"
+                    value={formData.type_of_content || ''}
+                    onChange={(e) => handleInputChange('type_of_content', e.target.value)}
+                    placeholder="Enter type of content (e.g., Video Campaign)"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="notes">Notes</Label>
+                  <Textarea
+                    id="notes"
+                    value={formData.notes || ''}
+                    onChange={(e) => handleInputChange('notes', e.target.value)}
+                    placeholder="Enter notes (e.g., Premium influencer contract)"
+                    rows={4}
                   />
                 </div>
 

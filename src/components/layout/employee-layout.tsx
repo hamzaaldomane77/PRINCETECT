@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { EmployeeSidebar } from './employee-sidebar';
-import Header from './header';
+import EmployeeHeader from './employee-header';
 import { useEmployeeAuth } from '@/contexts/employee-auth-context';
 
 interface EmployeeLayoutProps {
@@ -13,7 +13,7 @@ interface EmployeeLayoutProps {
 export function EmployeeLayout({ children }: EmployeeLayoutProps) {
   const router = useRouter();
   const pathname = usePathname();
-  const { user, logout } = useEmployeeAuth();
+  const { user, isAuthenticated, isLoading, logout } = useEmployeeAuth();
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [activePage, setActivePage] = useState('dashboard');
 
@@ -61,14 +61,28 @@ export function EmployeeLayout({ children }: EmployeeLayoutProps) {
     }
   };
 
-  // Redirect to login page if no user
+  // Strict redirect to login page if not authenticated
   useEffect(() => {
-    if (!user) {
-      router.push('/employee/login');
+    if (!isLoading && (!isAuthenticated || !user)) {
+      console.log('EmployeeLayout: Redirecting to login - not authenticated');
+      router.replace('/employee/login');
     }
-  }, [user, router]);
+  }, [isAuthenticated, isLoading, user, router]);
 
-  if (!user) {
+  // Show loading state
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-100 dark:bg-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-500 mx-auto mb-4"></div>
+          <p className="text-gray-600 dark:text-gray-400">جاري التحميل...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show redirect message if not authenticated
+  if (!isAuthenticated || !user) {
     return (
       <div className="min-h-screen bg-gray-100 dark:bg-gray-900 flex items-center justify-center">
         <div className="text-center">
@@ -90,7 +104,7 @@ export function EmployeeLayout({ children }: EmployeeLayoutProps) {
         />
         
         <div className="flex-1 flex flex-col h-full overflow-hidden">
-          <Header />
+          <EmployeeHeader />
           
           <main className="flex-1 overflow-auto">
             {children}

@@ -15,8 +15,32 @@ import { EmployeeTask, TaskStatus, taskStatusLabels } from '@/types/employee-tas
 import toast, { Toaster } from 'react-hot-toast';
 
 export default function EmployeeDashboard() {
-  const { user } = useEmployeeAuth();
+  const { user, isAuthenticated, isLoading } = useEmployeeAuth();
   const [tasks, setTasks] = useState<EmployeeTask[]>(generateDemoTasks());
+
+  // Security: Check authentication
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated || !user) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
+            غير مصرح بالدخول
+          </h2>
+          <p className="text-gray-600 dark:text-gray-400">
+            يجب تسجيل الدخول أولاً
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   // Calculate stats from tasks
   const stats = useMemo(() => {
@@ -73,7 +97,7 @@ export default function EmployeeDashboard() {
             <HomeIcon className="w-8 h-8" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold">مرحباً بك، {user?.name || 'موظف'}!</h1>
+            <h1 className="text-2xl font-bold">مرحباً بك، {user?.full_name || 'موظف'}!</h1>
             <p className="text-blue-100 mt-1">نظام إدارة الموظفين</p>
           </div>
         </div>

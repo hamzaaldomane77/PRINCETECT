@@ -66,7 +66,11 @@ export default function EditMarketingChannelPage() {
   const [editingOnlineChannel, setEditingOnlineChannel] = useState<OnlineChannel | null>(null);
   const [onlineChannelForm, setOnlineChannelForm] = useState<CreateOnlineChannelRequest>({
     platform: '',
-    main_goal: ''
+    main_goal: '',
+    pages: '',
+    type_of_content: '',
+    seo: '',
+    notes: ''
   });
 
   // Offline Channels state
@@ -74,7 +78,11 @@ export default function EditMarketingChannelPage() {
   const [editingOfflineChannel, setEditingOfflineChannel] = useState<OfflineChannel | null>(null);
   const [offlineChannelForm, setOfflineChannelForm] = useState<CreateOfflineChannelRequest>({
     type: '',
-    location: ''
+    location: '',
+    agency: '',
+    street: '',
+    type_of_content: '',
+    notes: ''
   });
 
   // Influencers state
@@ -82,7 +90,13 @@ export default function EditMarketingChannelPage() {
   const [editingInfluencer, setEditingInfluencer] = useState<Influencer | null>(null);
   const [influencerForm, setInfluencerForm] = useState<CreateInfluencerRequest>({
     name: '',
-    platform: ''
+    platform: '',
+    domain: '',
+    followers: '',
+    story_views: '',
+    post_likes: '',
+    content_type: '',
+    notes: ''
   });
 
   const [formData, setFormData] = useState<UpdateMarketingChannelRequest>({
@@ -216,7 +230,7 @@ export default function EditMarketingChannelPage() {
   // Online Channels handlers
   const handleAddOnlineChannel = () => {
     setEditingOnlineChannel(null);
-    setOnlineChannelForm({ platform: '', main_goal: '' });
+    setOnlineChannelForm({ platform: '', main_goal: '', pages: '', type_of_content: '', seo: '', notes: '' });
     setOnlineChannelDialogOpen(true);
   };
 
@@ -224,7 +238,11 @@ export default function EditMarketingChannelPage() {
     setEditingOnlineChannel(onlineChannel);
     setOnlineChannelForm({
       platform: onlineChannel.platform || '',
-      main_goal: onlineChannel.main_goal || ''
+      main_goal: onlineChannel.main_goal || '',
+      pages: onlineChannel.pages || '',
+      type_of_content: onlineChannel.type_of_content || '',
+      seo: onlineChannel.seo || '',
+      notes: onlineChannel.notes || ''
     });
     setOnlineChannelDialogOpen(true);
   };
@@ -250,7 +268,14 @@ export default function EditMarketingChannelPage() {
       if (editingOnlineChannel) {
         await updateOnlineChannelMutation.mutateAsync({
           id: editingOnlineChannel.id,
-          data: onlineChannelForm
+          data: {
+            platform: onlineChannelForm.platform,
+            main_goal: onlineChannelForm.main_goal,
+            pages: onlineChannelForm.pages || undefined,
+            type_of_content: onlineChannelForm.type_of_content || undefined,
+            seo: onlineChannelForm.seo || undefined,
+            notes: onlineChannelForm.notes || undefined
+          }
         });
         toast.success('Online channel updated successfully');
       } else {
@@ -259,7 +284,7 @@ export default function EditMarketingChannelPage() {
       }
       setOnlineChannelDialogOpen(false);
       setEditingOnlineChannel(null);
-      setOnlineChannelForm({ platform: '', main_goal: '' });
+      setOnlineChannelForm({ platform: '', main_goal: '', pages: '', type_of_content: '', seo: '', notes: '' });
     } catch (error) {
       toast.error('Failed to save online channel');
     }
@@ -268,7 +293,7 @@ export default function EditMarketingChannelPage() {
   // Offline Channels handlers
   const handleAddOfflineChannel = () => {
     setEditingOfflineChannel(null);
-    setOfflineChannelForm({ type: '', location: '' });
+    setOfflineChannelForm({ type: '', location: '', agency: '', street: '', type_of_content: '', notes: '' });
     setOfflineChannelDialogOpen(true);
   };
 
@@ -276,7 +301,11 @@ export default function EditMarketingChannelPage() {
     setEditingOfflineChannel(offlineChannel);
     setOfflineChannelForm({
       type: offlineChannel.type || '',
-      location: offlineChannel.location || ''
+      location: offlineChannel.location || '',
+      agency: offlineChannel.agency || '',
+      street: offlineChannel.street || '',
+      type_of_content: offlineChannel.type_of_content || '',
+      notes: offlineChannel.notes || ''
     });
     setOfflineChannelDialogOpen(true);
   };
@@ -302,7 +331,14 @@ export default function EditMarketingChannelPage() {
       if (editingOfflineChannel) {
         await updateOfflineChannelMutation.mutateAsync({
           id: editingOfflineChannel.id,
-          data: offlineChannelForm
+          data: {
+            type: offlineChannelForm.type,
+            location: offlineChannelForm.location,
+            agency: offlineChannelForm.agency || undefined,
+            street: offlineChannelForm.street || undefined,
+            type_of_content: offlineChannelForm.type_of_content || undefined,
+            notes: offlineChannelForm.notes || undefined
+          }
         });
         toast.success('Offline channel updated successfully');
       } else {
@@ -311,7 +347,7 @@ export default function EditMarketingChannelPage() {
       }
       setOfflineChannelDialogOpen(false);
       setEditingOfflineChannel(null);
-      setOfflineChannelForm({ type: '', location: '' });
+      setOfflineChannelForm({ type: '', location: '', agency: '', street: '', type_of_content: '', notes: '' });
     } catch (error) {
       toast.error('Failed to save offline channel');
     }
@@ -320,7 +356,7 @@ export default function EditMarketingChannelPage() {
   // Influencers handlers
   const handleAddInfluencer = () => {
     setEditingInfluencer(null);
-    setInfluencerForm({ name: '', platform: '' });
+    setInfluencerForm({ name: '', platform: '', domain: '', followers: '', story_views: '', post_likes: '', content_type: '', notes: '' });
     setInfluencerDialogOpen(true);
   };
 
@@ -328,7 +364,13 @@ export default function EditMarketingChannelPage() {
     setEditingInfluencer(influencer);
     setInfluencerForm({
       name: influencer.name || '',
-      platform: influencer.platform || ''
+      platform: influencer.platform || '',
+      domain: influencer.domain || '',
+      followers: influencer.followers || '',
+      story_views: influencer.story_views || '',
+      post_likes: influencer.post_likes || '',
+      content_type: influencer.content_type || '',
+      notes: influencer.notes || ''
     });
     setInfluencerDialogOpen(true);
   };
@@ -354,7 +396,16 @@ export default function EditMarketingChannelPage() {
       if (editingInfluencer) {
         await updateInfluencerMutation.mutateAsync({
           id: editingInfluencer.id,
-          data: influencerForm
+          data: {
+            name: influencerForm.name,
+            platform: influencerForm.platform,
+            domain: influencerForm.domain || undefined,
+            followers: influencerForm.followers ? String(influencerForm.followers) : undefined,
+            story_views: influencerForm.story_views ? String(influencerForm.story_views) : undefined,
+            post_likes: influencerForm.post_likes ? String(influencerForm.post_likes) : undefined,
+            content_type: influencerForm.content_type || undefined,
+            notes: influencerForm.notes || undefined
+          }
         });
         toast.success('Influencer updated successfully');
       } else {
@@ -363,7 +414,7 @@ export default function EditMarketingChannelPage() {
       }
       setInfluencerDialogOpen(false);
       setEditingInfluencer(null);
-      setInfluencerForm({ name: '', platform: '' });
+      setInfluencerForm({ name: '', platform: '', domain: '', followers: '', story_views: '', post_likes: '', content_type: '', notes: '' });
     } catch (error) {
       toast.error('Failed to save influencer');
     }
@@ -591,8 +642,8 @@ export default function EditMarketingChannelPage() {
             {/* Online Channels Section */}
             <Card className="p-6">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-                  Online Channels
+                <h2 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                  Online Channels ({channel?.online_channels?.length || 0})
                 </h2>
                 <Button
                   onClick={() => router.push(`/super-admin/marketing-channels/${channelId}/online-channels/create`)}
@@ -603,19 +654,43 @@ export default function EditMarketingChannelPage() {
                 </Button>
               </div>
               {channel?.online_channels && channel.online_channels.length > 0 ? (
-                <div className="space-y-4">
+                <div className="space-y-6">
                   {channel.online_channels.map((onlineChannel) => (
-                    <div key={onlineChannel.id} className="border rounded-lg p-4">
+                    <div key={onlineChannel.id} className="border-l-4 border-blue-500 pl-4 pb-4 last:pb-0">
                       <div className="flex items-start justify-between">
-                        <div className="flex-1 grid grid-cols-2 gap-4">
+                        <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-4">
                           <div>
-                            <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Platform</label>
-                            <p className="text-base text-gray-900 dark:text-white">{onlineChannel.platform || 'N/A'}</p>
+                            <label className="text-xs font-medium text-gray-500 dark:text-gray-400 block mb-1">Platform</label>
+                            <p className="text-base font-medium text-gray-900 dark:text-white">{onlineChannel.platform || 'N/A'}</p>
                           </div>
                           <div>
-                            <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Main Goal</label>
+                            <label className="text-xs font-medium text-gray-500 dark:text-gray-400 block mb-1">Main Goal</label>
                             <p className="text-base text-gray-900 dark:text-white">{onlineChannel.main_goal || 'N/A'}</p>
                           </div>
+                          {onlineChannel.pages && (
+                            <div>
+                              <label className="text-xs font-medium text-gray-500 dark:text-gray-400 block mb-1">Pages</label>
+                              <p className="text-base text-gray-700 dark:text-gray-300">{onlineChannel.pages}</p>
+                            </div>
+                          )}
+                          {onlineChannel.type_of_content && (
+                            <div>
+                              <label className="text-xs font-medium text-gray-500 dark:text-gray-400 block mb-1">Type of Content</label>
+                              <p className="text-base text-gray-700 dark:text-gray-300">{onlineChannel.type_of_content}</p>
+                            </div>
+                          )}
+                          {onlineChannel.seo && (
+                            <div>
+                              <label className="text-xs font-medium text-gray-500 dark:text-gray-400 block mb-1">SEO</label>
+                              <p className="text-base text-gray-700 dark:text-gray-300">{onlineChannel.seo}</p>
+                            </div>
+                          )}
+                          {onlineChannel.notes && (
+                            <div className="lg:col-span-2">
+                              <label className="text-xs font-medium text-gray-500 dark:text-gray-400 block mb-1">Notes</label>
+                              <p className="text-base text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{onlineChannel.notes}</p>
+                            </div>
+                          )}
                         </div>
                         <div className="flex gap-2 ml-4">
                           <Button
@@ -646,8 +721,8 @@ export default function EditMarketingChannelPage() {
             {/* Offline Channels Section */}
             <Card className="p-6">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-                  Offline Channels
+                <h2 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                  Offline Channels ({channel?.offline_channels?.length || 0})
                 </h2>
                 <Button
                   onClick={() => router.push(`/super-admin/marketing-channels/${channelId}/offline-channels/create`)}
@@ -658,19 +733,43 @@ export default function EditMarketingChannelPage() {
                 </Button>
               </div>
               {channel?.offline_channels && channel.offline_channels.length > 0 ? (
-                <div className="space-y-4">
+                <div className="space-y-6">
                   {channel.offline_channels.map((offlineChannel) => (
-                    <div key={offlineChannel.id} className="border rounded-lg p-4">
+                    <div key={offlineChannel.id} className="border-l-4 border-purple-500 pl-4 pb-4 last:pb-0">
                       <div className="flex items-start justify-between">
-                        <div className="flex-1 grid grid-cols-2 gap-4">
+                        <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-4">
                           <div>
-                            <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Type</label>
-                            <p className="text-base text-gray-900 dark:text-white">{offlineChannel.type || 'N/A'}</p>
+                            <label className="text-xs font-medium text-gray-500 dark:text-gray-400 block mb-1">Type</label>
+                            <p className="text-base font-medium text-gray-900 dark:text-white">{offlineChannel.type || 'N/A'}</p>
                           </div>
                           <div>
-                            <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Location</label>
+                            <label className="text-xs font-medium text-gray-500 dark:text-gray-400 block mb-1">Location</label>
                             <p className="text-base text-gray-900 dark:text-white">{offlineChannel.location || 'N/A'}</p>
                           </div>
+                          {offlineChannel.agency && (
+                            <div>
+                              <label className="text-xs font-medium text-gray-500 dark:text-gray-400 block mb-1">Agency</label>
+                              <p className="text-base text-gray-700 dark:text-gray-300">{offlineChannel.agency}</p>
+                            </div>
+                          )}
+                          {offlineChannel.street && (
+                            <div>
+                              <label className="text-xs font-medium text-gray-500 dark:text-gray-400 block mb-1">Street</label>
+                              <p className="text-base text-gray-700 dark:text-gray-300">{offlineChannel.street}</p>
+                            </div>
+                          )}
+                          {offlineChannel.type_of_content && (
+                            <div>
+                              <label className="text-xs font-medium text-gray-500 dark:text-gray-400 block mb-1">Type of Content</label>
+                              <p className="text-base text-gray-700 dark:text-gray-300">{offlineChannel.type_of_content}</p>
+                            </div>
+                          )}
+                          {offlineChannel.notes && (
+                            <div className="lg:col-span-2">
+                              <label className="text-xs font-medium text-gray-500 dark:text-gray-400 block mb-1">Notes</label>
+                              <p className="text-base text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{offlineChannel.notes}</p>
+                            </div>
+                          )}
                         </div>
                         <div className="flex gap-2 ml-4">
                           <Button
@@ -701,8 +800,8 @@ export default function EditMarketingChannelPage() {
             {/* Influencers Section */}
             <Card className="p-6">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-                  Influencers
+                <h2 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                  Influencers ({channel?.influencers?.length || 0})
                 </h2>
                 <Button
                   onClick={() => router.push(`/super-admin/marketing-channels/${channelId}/influencers/create`)}
@@ -713,19 +812,55 @@ export default function EditMarketingChannelPage() {
                 </Button>
               </div>
               {channel?.influencers && channel.influencers.length > 0 ? (
-                <div className="space-y-4">
+                <div className="space-y-6">
                   {channel.influencers.map((influencer) => (
-                    <div key={influencer.id} className="border rounded-lg p-4">
+                    <div key={influencer.id} className="border-l-4 border-teal-500 pl-4 pb-4 last:pb-0">
                       <div className="flex items-start justify-between">
-                        <div className="flex-1 grid grid-cols-2 gap-4">
+                        <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-4">
                           <div>
-                            <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Name</label>
-                            <p className="text-base text-gray-900 dark:text-white">{influencer.name || 'N/A'}</p>
+                            <label className="text-xs font-medium text-gray-500 dark:text-gray-400 block mb-1">Name</label>
+                            <p className="text-base font-medium text-gray-900 dark:text-white">{influencer.name || 'N/A'}</p>
                           </div>
                           <div>
-                            <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Platform</label>
+                            <label className="text-xs font-medium text-gray-500 dark:text-gray-400 block mb-1">Platform</label>
                             <p className="text-base text-gray-900 dark:text-white">{influencer.platform || 'N/A'}</p>
                           </div>
+                          {influencer.domain && (
+                            <div>
+                              <label className="text-xs font-medium text-gray-500 dark:text-gray-400 block mb-1">Domain</label>
+                              <p className="text-base text-gray-700 dark:text-gray-300">{influencer.domain}</p>
+                            </div>
+                          )}
+                          {influencer.followers && (
+                            <div>
+                              <label className="text-xs font-medium text-gray-500 dark:text-gray-400 block mb-1">Followers</label>
+                              <p className="text-base text-gray-700 dark:text-gray-300">{influencer.followers}</p>
+                            </div>
+                          )}
+                          {influencer.story_views && (
+                            <div>
+                              <label className="text-xs font-medium text-gray-500 dark:text-gray-400 block mb-1">Story Views</label>
+                              <p className="text-base text-gray-700 dark:text-gray-300">{influencer.story_views}</p>
+                            </div>
+                          )}
+                          {influencer.post_likes && (
+                            <div>
+                              <label className="text-xs font-medium text-gray-500 dark:text-gray-400 block mb-1">Post Likes</label>
+                              <p className="text-base text-gray-700 dark:text-gray-300">{influencer.post_likes}</p>
+                            </div>
+                          )}
+                          {influencer.content_type && (
+                            <div>
+                              <label className="text-xs font-medium text-gray-500 dark:text-gray-400 block mb-1">Content Type</label>
+                              <p className="text-base text-gray-700 dark:text-gray-300">{influencer.content_type}</p>
+                            </div>
+                          )}
+                          {influencer.notes && (
+                            <div className="lg:col-span-2">
+                              <label className="text-xs font-medium text-gray-500 dark:text-gray-400 block mb-1">Notes</label>
+                              <p className="text-base text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{influencer.notes}</p>
+                            </div>
+                          )}
                         </div>
                         <div className="flex gap-2 ml-4">
                           <Button
@@ -764,7 +899,7 @@ export default function EditMarketingChannelPage() {
                 {editingOnlineChannel ? 'Update online channel information' : 'Create a new online channel'}
               </DialogDescription>
             </DialogHeader>
-            <div className="space-y-4 py-4">
+            <div className="space-y-4 py-4 max-h-[70vh] overflow-y-auto">
               <div className="space-y-2">
                 <Label htmlFor="platform">Platform <span className="text-red-500">*</span></Label>
                 <Input
@@ -783,6 +918,43 @@ export default function EditMarketingChannelPage() {
                   onChange={(e) => setOnlineChannelForm({ ...onlineChannelForm, main_goal: e.target.value })}
                   placeholder="Enter main goal"
                   required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="pages">Pages</Label>
+                <Input
+                  id="pages"
+                  value={onlineChannelForm.pages || ''}
+                  onChange={(e) => setOnlineChannelForm({ ...onlineChannelForm, pages: e.target.value })}
+                  placeholder="Enter pages"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="type_of_content">Type of Content</Label>
+                <Input
+                  id="type_of_content"
+                  value={onlineChannelForm.type_of_content || ''}
+                  onChange={(e) => setOnlineChannelForm({ ...onlineChannelForm, type_of_content: e.target.value })}
+                  placeholder="Enter type of content"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="seo">SEO</Label>
+                <Input
+                  id="seo"
+                  value={onlineChannelForm.seo || ''}
+                  onChange={(e) => setOnlineChannelForm({ ...onlineChannelForm, seo: e.target.value })}
+                  placeholder="Enter SEO keywords"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="notes">Notes</Label>
+                <Textarea
+                  id="notes"
+                  value={onlineChannelForm.notes || ''}
+                  onChange={(e) => setOnlineChannelForm({ ...onlineChannelForm, notes: e.target.value })}
+                  placeholder="Enter notes"
+                  rows={3}
                 />
               </div>
             </div>
@@ -810,7 +982,7 @@ export default function EditMarketingChannelPage() {
                 {editingOfflineChannel ? 'Update offline channel information' : 'Create a new offline channel'}
               </DialogDescription>
             </DialogHeader>
-            <div className="space-y-4 py-4">
+            <div className="space-y-4 py-4 max-h-[70vh] overflow-y-auto">
               <div className="space-y-2">
                 <Label htmlFor="type">Type <span className="text-red-500">*</span></Label>
                 <Input
@@ -829,6 +1001,43 @@ export default function EditMarketingChannelPage() {
                   onChange={(e) => setOfflineChannelForm({ ...offlineChannelForm, location: e.target.value })}
                   placeholder="Enter location"
                   required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="agency">Agency</Label>
+                <Input
+                  id="agency"
+                  value={offlineChannelForm.agency || ''}
+                  onChange={(e) => setOfflineChannelForm({ ...offlineChannelForm, agency: e.target.value })}
+                  placeholder="Enter agency"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="street">Street</Label>
+                <Input
+                  id="street"
+                  value={offlineChannelForm.street || ''}
+                  onChange={(e) => setOfflineChannelForm({ ...offlineChannelForm, street: e.target.value })}
+                  placeholder="Enter street"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="type_of_content">Type of Content</Label>
+                <Input
+                  id="type_of_content"
+                  value={offlineChannelForm.type_of_content || ''}
+                  onChange={(e) => setOfflineChannelForm({ ...offlineChannelForm, type_of_content: e.target.value })}
+                  placeholder="Enter type of content"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="notes">Notes</Label>
+                <Textarea
+                  id="notes"
+                  value={offlineChannelForm.notes || ''}
+                  onChange={(e) => setOfflineChannelForm({ ...offlineChannelForm, notes: e.target.value })}
+                  placeholder="Enter notes"
+                  rows={3}
                 />
               </div>
             </div>
@@ -856,7 +1065,7 @@ export default function EditMarketingChannelPage() {
                 {editingInfluencer ? 'Update influencer information' : 'Create a new influencer'}
               </DialogDescription>
             </DialogHeader>
-            <div className="space-y-4 py-4">
+            <div className="space-y-4 py-4 max-h-[70vh] overflow-y-auto">
               <div className="space-y-2">
                 <Label htmlFor="influencer_name">Name <span className="text-red-500">*</span></Label>
                 <Input
@@ -875,6 +1084,66 @@ export default function EditMarketingChannelPage() {
                   onChange={(e) => setInfluencerForm({ ...influencerForm, platform: e.target.value })}
                   placeholder="Enter platform"
                   required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="domain">Domain</Label>
+                <Input
+                  id="domain"
+                  value={influencerForm.domain || ''}
+                  onChange={(e) => setInfluencerForm({ ...influencerForm, domain: e.target.value })}
+                  placeholder="Enter domain"
+                />
+              </div>
+              <div className="grid grid-cols-3 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="followers">Followers</Label>
+                  <Input
+                    id="followers"
+                    type="number"
+                    value={influencerForm.followers || ''}
+                    onChange={(e) => setInfluencerForm({ ...influencerForm, followers: e.target.value ? parseInt(e.target.value) : null })}
+                    placeholder="Followers"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="story_views">Story Views</Label>
+                  <Input
+                    id="story_views"
+                    type="number"
+                    value={influencerForm.story_views || ''}
+                    onChange={(e) => setInfluencerForm({ ...influencerForm, story_views: e.target.value ? parseInt(e.target.value) : null })}
+                    placeholder="Story Views"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="post_likes">Post Likes</Label>
+                  <Input
+                    id="post_likes"
+                    type="number"
+                    value={influencerForm.post_likes || ''}
+                    onChange={(e) => setInfluencerForm({ ...influencerForm, post_likes: e.target.value ? parseInt(e.target.value) : null })}
+                    placeholder="Post Likes"
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="content_type">Content Type</Label>
+                <Input
+                  id="content_type"
+                  value={influencerForm.content_type || ''}
+                  onChange={(e) => setInfluencerForm({ ...influencerForm, content_type: e.target.value })}
+                  placeholder="Enter content type"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="influencer_notes">Notes</Label>
+                <Textarea
+                  id="influencer_notes"
+                  value={influencerForm.notes || ''}
+                  onChange={(e) => setInfluencerForm({ ...influencerForm, notes: e.target.value })}
+                  placeholder="Enter notes"
+                  rows={3}
                 />
               </div>
             </div>

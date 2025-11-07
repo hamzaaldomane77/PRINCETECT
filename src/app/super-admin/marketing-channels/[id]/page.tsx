@@ -181,24 +181,24 @@ export default function MarketingChannelDetailsPage() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Basic Information */}
               <Card className="p-6">
-                <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">
+                <h2 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-4">
                   Channel Information
                 </h2>
                 <div className="space-y-4">
                   <div>
-                    <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                    <label className="text-xs font-medium text-gray-500 dark:text-gray-400 block mb-1">
                       Channel ID
                     </label>
-                    <p className="text-base text-gray-900 dark:text-white">{channel.id}</p>
+                    <p className="text-base font-medium text-gray-900 dark:text-white">{channel.id}</p>
                   </div>
                   <div>
-                    <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                    <label className="text-xs font-medium text-gray-500 dark:text-gray-400 block mb-1">
                       Channel Name
                     </label>
                     <p className="text-base text-gray-900 dark:text-white">{channel.name}</p>
                   </div>
                   <div>
-                    <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                    <label className="text-xs font-medium text-gray-500 dark:text-gray-400 block mb-1">
                       Channel Type
                     </label>
                     <div className="mt-1">
@@ -208,7 +208,7 @@ export default function MarketingChannelDetailsPage() {
                     </div>
                   </div>
                   <div>
-                    <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                    <label className="text-xs font-medium text-gray-500 dark:text-gray-400 block mb-1">
                       PDA Document ID
                     </label>
                     <p className="text-base text-gray-900 dark:text-white">{channel.pda_document_id}</p>
@@ -219,30 +219,30 @@ export default function MarketingChannelDetailsPage() {
               {/* PDA Document Information */}
               {channel.pda_document && (
                 <Card className="p-6">
-                  <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">
+                  <h2 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-4">
                     PDA Document Information
                   </h2>
                   <div className="space-y-4">
                     <div>
-                      <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                      <label className="text-xs font-medium text-gray-500 dark:text-gray-400 block mb-1">
                         Document ID
                       </label>
-                      <p className="text-base text-gray-900 dark:text-white">{channel.pda_document.id}</p>
+                      <p className="text-base font-medium text-gray-900 dark:text-white">{channel.pda_document.id}</p>
                     </div>
                     <div>
-                      <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                      <label className="text-xs font-medium text-gray-500 dark:text-gray-400 block mb-1">
                         Contract ID
                       </label>
                       <p className="text-base text-gray-900 dark:text-white">{channel.pda_document.contract_id}</p>
                     </div>
                     <div>
-                      <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                      <label className="text-xs font-medium text-gray-500 dark:text-gray-400 block mb-1">
                         Customer ID
                       </label>
                       <p className="text-base text-gray-900 dark:text-white">{channel.pda_document.customer_id}</p>
                     </div>
                     <div>
-                      <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                      <label className="text-xs font-medium text-gray-500 dark:text-gray-400 block mb-1">
                         Status
                       </label>
                       <div className="mt-1">
@@ -259,72 +259,72 @@ export default function MarketingChannelDetailsPage() {
             {/* Details */}
             {channel.details && channel.details.length > 0 && (
               <Card className="p-6">
-                <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">
+                <h2 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-4">
                   Details
                 </h2>
-                <ul className="space-y-2">
+                <div className="space-y-3">
                   {channel.details.map((detail, index) => (
-                    <li key={index} className="flex items-start">
-                      <span className="text-orange-600 dark:text-orange-400 mr-2">•</span>
-                      <p className="text-base text-gray-900 dark:text-white">{detail}</p>
-                    </li>
+                    <div key={index} className="flex items-start">
+                      <span className="text-orange-600 dark:text-orange-400 mr-3 mt-1">•</span>
+                      <p className="text-base text-gray-700 dark:text-gray-300 leading-relaxed flex-1">{detail}</p>
+                    </div>
                   ))}
-                </ul>
+                </div>
               </Card>
             )}
 
             {/* Online Channels */}
             {channel.online_channels && channel.online_channels.length > 0 && (
               <Card className="p-6">
-                <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">
-                  Online Channels
+                <h2 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-4">
+                  Online Channels ({channel.online_channels.length})
                 </h2>
-                <div className="space-y-4">
+                <div className="space-y-6">
                   {channel.online_channels.map((onlineChannel) => (
-                    <div key={onlineChannel.id} className="border-b pb-4 last:border-b-0 last:pb-0">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div key={onlineChannel.id} className="border-l-4 border-blue-500 pl-4 pb-4 last:pb-0">
+                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                         <div>
-                          <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                          <label className="text-xs font-medium text-gray-500 dark:text-gray-400 block mb-1">
                             Platform
                           </label>
-                          <p className="text-base text-gray-900 dark:text-white">{onlineChannel.platform || 'N/A'}</p>
+                          <p className="text-base font-medium text-gray-900 dark:text-white">{onlineChannel.platform || 'N/A'}</p>
                         </div>
                         <div>
-                          <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                          <label className="text-xs font-medium text-gray-500 dark:text-gray-400 block mb-1">
                             Main Goal
                           </label>
                           <p className="text-base text-gray-900 dark:text-white">{onlineChannel.main_goal || 'N/A'}</p>
                         </div>
                         {onlineChannel.pages && (
                           <div>
-                            <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                            <label className="text-xs font-medium text-gray-500 dark:text-gray-400 block mb-1">
                               Pages
                             </label>
-                            <p className="text-base text-gray-900 dark:text-white">{onlineChannel.pages}</p>
+                            <p className="text-base text-gray-700 dark:text-gray-300">{onlineChannel.pages}</p>
                           </div>
                         )}
                         {onlineChannel.type_of_content && (
                           <div>
-                            <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                            <label className="text-xs font-medium text-gray-500 dark:text-gray-400 block mb-1">
                               Type of Content
                             </label>
-                            <p className="text-base text-gray-900 dark:text-white">{onlineChannel.type_of_content}</p>
+                            <p className="text-base text-gray-700 dark:text-gray-300">{onlineChannel.type_of_content}</p>
                           </div>
                         )}
                         {onlineChannel.seo && (
                           <div>
-                            <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                            <label className="text-xs font-medium text-gray-500 dark:text-gray-400 block mb-1">
                               SEO
                             </label>
-                            <p className="text-base text-gray-900 dark:text-white">{onlineChannel.seo}</p>
+                            <p className="text-base text-gray-700 dark:text-gray-300">{onlineChannel.seo}</p>
                           </div>
                         )}
                         {onlineChannel.notes && (
-                          <div>
-                            <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                          <div className="lg:col-span-2">
+                            <label className="text-xs font-medium text-gray-500 dark:text-gray-400 block mb-1">
                               Notes
                             </label>
-                            <p className="text-base text-gray-900 dark:text-white">{onlineChannel.notes}</p>
+                            <p className="text-base text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{onlineChannel.notes}</p>
                           </div>
                         )}
                       </div>
@@ -337,55 +337,55 @@ export default function MarketingChannelDetailsPage() {
             {/* Offline Channels */}
             {channel.offline_channels && channel.offline_channels.length > 0 && (
               <Card className="p-6">
-                <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">
-                  Offline Channels
+                <h2 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-4">
+                  Offline Channels ({channel.offline_channels.length})
                 </h2>
-                <div className="space-y-4">
+                <div className="space-y-6">
                   {channel.offline_channels.map((offlineChannel) => (
-                    <div key={offlineChannel.id} className="border-b pb-4 last:border-b-0 last:pb-0">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div key={offlineChannel.id} className="border-l-4 border-purple-500 pl-4 pb-4 last:pb-0">
+                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                         <div>
-                          <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                          <label className="text-xs font-medium text-gray-500 dark:text-gray-400 block mb-1">
                             Type
                           </label>
-                          <p className="text-base text-gray-900 dark:text-white">{offlineChannel.type || 'N/A'}</p>
+                          <p className="text-base font-medium text-gray-900 dark:text-white">{offlineChannel.type || 'N/A'}</p>
                         </div>
                         <div>
-                          <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                          <label className="text-xs font-medium text-gray-500 dark:text-gray-400 block mb-1">
                             Location
                           </label>
                           <p className="text-base text-gray-900 dark:text-white">{offlineChannel.location || 'N/A'}</p>
                         </div>
                         {offlineChannel.agency && (
                           <div>
-                            <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                            <label className="text-xs font-medium text-gray-500 dark:text-gray-400 block mb-1">
                               Agency
                             </label>
-                            <p className="text-base text-gray-900 dark:text-white">{offlineChannel.agency}</p>
+                            <p className="text-base text-gray-700 dark:text-gray-300">{offlineChannel.agency}</p>
                           </div>
                         )}
                         {offlineChannel.street && (
                           <div>
-                            <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                            <label className="text-xs font-medium text-gray-500 dark:text-gray-400 block mb-1">
                               Street
                             </label>
-                            <p className="text-base text-gray-900 dark:text-white">{offlineChannel.street}</p>
+                            <p className="text-base text-gray-700 dark:text-gray-300">{offlineChannel.street}</p>
                           </div>
                         )}
                         {offlineChannel.type_of_content && (
                           <div>
-                            <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                            <label className="text-xs font-medium text-gray-500 dark:text-gray-400 block mb-1">
                               Type of Content
                             </label>
-                            <p className="text-base text-gray-900 dark:text-white">{offlineChannel.type_of_content}</p>
+                            <p className="text-base text-gray-700 dark:text-gray-300">{offlineChannel.type_of_content}</p>
                           </div>
                         )}
                         {offlineChannel.notes && (
-                          <div>
-                            <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                          <div className="lg:col-span-2">
+                            <label className="text-xs font-medium text-gray-500 dark:text-gray-400 block mb-1">
                               Notes
                             </label>
-                            <p className="text-base text-gray-900 dark:text-white">{offlineChannel.notes}</p>
+                            <p className="text-base text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{offlineChannel.notes}</p>
                           </div>
                         )}
                       </div>
@@ -398,71 +398,71 @@ export default function MarketingChannelDetailsPage() {
             {/* Influencers */}
             {channel.influencers && channel.influencers.length > 0 && (
               <Card className="p-6">
-                <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">
-                  Influencers
+                <h2 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-4">
+                  Influencers ({channel.influencers.length})
                 </h2>
-                <div className="space-y-4">
+                <div className="space-y-6">
                   {channel.influencers.map((influencer) => (
-                    <div key={influencer.id} className="border-b pb-4 last:border-b-0 last:pb-0">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div key={influencer.id} className="border-l-4 border-teal-500 pl-4 pb-4 last:pb-0">
+                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                         <div>
-                          <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                          <label className="text-xs font-medium text-gray-500 dark:text-gray-400 block mb-1">
                             Name
                           </label>
-                          <p className="text-base text-gray-900 dark:text-white">{influencer.name || 'N/A'}</p>
+                          <p className="text-base font-medium text-gray-900 dark:text-white">{influencer.name || 'N/A'}</p>
                         </div>
                         <div>
-                          <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                          <label className="text-xs font-medium text-gray-500 dark:text-gray-400 block mb-1">
                             Platform
                           </label>
                           <p className="text-base text-gray-900 dark:text-white">{influencer.platform || 'N/A'}</p>
                         </div>
                         {influencer.domain && (
                           <div>
-                            <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                            <label className="text-xs font-medium text-gray-500 dark:text-gray-400 block mb-1">
                               Domain
                             </label>
-                            <p className="text-base text-gray-900 dark:text-white">{influencer.domain}</p>
+                            <p className="text-base text-gray-700 dark:text-gray-300">{influencer.domain}</p>
                           </div>
                         )}
                         {influencer.followers && (
                           <div>
-                            <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                            <label className="text-xs font-medium text-gray-500 dark:text-gray-400 block mb-1">
                               Followers
                             </label>
-                            <p className="text-base text-gray-900 dark:text-white">{influencer.followers}</p>
+                            <p className="text-base text-gray-700 dark:text-gray-300">{influencer.followers}</p>
                           </div>
                         )}
                         {influencer.story_views && (
                           <div>
-                            <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                            <label className="text-xs font-medium text-gray-500 dark:text-gray-400 block mb-1">
                               Story Views
                             </label>
-                            <p className="text-base text-gray-900 dark:text-white">{influencer.story_views}</p>
+                            <p className="text-base text-gray-700 dark:text-gray-300">{influencer.story_views}</p>
                           </div>
                         )}
                         {influencer.post_likes && (
                           <div>
-                            <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                            <label className="text-xs font-medium text-gray-500 dark:text-gray-400 block mb-1">
                               Post Likes
                             </label>
-                            <p className="text-base text-gray-900 dark:text-white">{influencer.post_likes}</p>
+                            <p className="text-base text-gray-700 dark:text-gray-300">{influencer.post_likes}</p>
                           </div>
                         )}
                         {influencer.content_type && (
                           <div>
-                            <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                            <label className="text-xs font-medium text-gray-500 dark:text-gray-400 block mb-1">
                               Content Type
                             </label>
-                            <p className="text-base text-gray-900 dark:text-white">{influencer.content_type}</p>
+                            <p className="text-base text-gray-700 dark:text-gray-300">{influencer.content_type}</p>
                           </div>
                         )}
                         {influencer.notes && (
-                          <div>
-                            <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                          <div className="lg:col-span-2">
+                            <label className="text-xs font-medium text-gray-500 dark:text-gray-400 block mb-1">
                               Notes
                             </label>
-                            <p className="text-base text-gray-900 dark:text-white">{influencer.notes}</p>
+                            <p className="text-base text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{influencer.notes}</p>
                           </div>
                         )}
                       </div>
@@ -473,24 +473,24 @@ export default function MarketingChannelDetailsPage() {
             )}
 
             {/* Timestamps */}
-            <Card className="p-6">
-              <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">
+            <Card className="p-6 bg-gray-50 dark:bg-gray-800/50">
+              <h2 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-4">
                 Timestamps
               </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                  <label className="text-xs font-medium text-gray-500 dark:text-gray-400 block mb-1">
                     Created At
                   </label>
-                  <p className="text-base text-gray-900 dark:text-white">
+                  <p className="text-sm text-gray-900 dark:text-white">
                     {formatDate(channel.created_at)}
                   </p>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                  <label className="text-xs font-medium text-gray-500 dark:text-gray-400 block mb-1">
                     Updated At
                   </label>
-                  <p className="text-base text-gray-900 dark:text-white">
+                  <p className="text-sm text-gray-900 dark:text-white">
                     {formatDate(channel.updated_at)}
                   </p>
                 </div>

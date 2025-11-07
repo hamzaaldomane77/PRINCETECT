@@ -58,7 +58,8 @@ import {
   Check,
   File,
   Radio,
-  LayoutGrid
+  LayoutGrid,
+  Copy
 } from 'lucide-react';
 
 export const HomeIcon = ({ className = "w-5 h-5" }: { className?: string }) => (
@@ -354,4 +355,8 @@ export const MarketingChannelsIcon = ({ className = "w-4 h-4" }: { className?: s
 
 export const MarketingMixesIcon = ({ className = "w-4 h-4" }: { className?: string }) => (
   <LayoutGrid className={className} />
+);
+
+export const CopyIcon = ({ className = "w-4 h-4" }: { className?: string }) => (
+  <Copy className={className} />
 );

@@ -3,7 +3,9 @@ import {
   AidaFunnelsResponse, 
   AidaFunnelDetailsResponse, 
   CreateAidaFunnelRequest, 
-  UpdateAidaFunnelRequest 
+  UpdateAidaFunnelRequest,
+  ReorderAidaFunnelsRequest,
+  ReorderAidaFunnelsResponse
 } from '../types';
 
 export class AidaFunnelsApi {
@@ -33,6 +35,13 @@ export class AidaFunnelsApi {
 
   static async deleteAidaFunnel(id: number): Promise<{ success: boolean; message: string }> {
     return await apiClient.delete<{ success: boolean; message: string }>(`${this.baseUrl}/${id}`);
+  }
+
+  static async reorderAidaFunnels(data: ReorderAidaFunnelsRequest): Promise<ReorderAidaFunnelsResponse> {
+    return await apiClient.post<ReorderAidaFunnelsResponse>(
+      `${this.baseUrl}/reorder`,
+      data as unknown as Record<string, unknown>
+    );
   }
 }
 

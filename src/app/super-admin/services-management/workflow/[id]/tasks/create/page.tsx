@@ -11,12 +11,14 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowLeftIcon, SaveIcon, WorkflowIcon } from '@/components/ui/icons';
-import { useCreateWorkflowTask, useTaskTypesLookup, useTaskDependenciesLookup } from '@/modules/workflow-tasks';
+import { ArrowLeftIcon, SaveIcon, WorkflowIcon, PlusIcon, TrashIcon } from '@/components/ui/icons';
+import { useCreateWorkflowTask, useTaskTypesLookup, useTaskDependenciesLookup, useWorkflowTasks } from '@/modules/workflow-tasks';
 import { useServiceWorkflow } from '@/modules/service-workflows';
 import { CreateWorkflowTaskRequest } from '@/modules/workflow-tasks/types';
 import { toast } from 'sonner';
+import { useEffect } from 'react';
 
 export default function CreateWorkflowTaskPage() {
   const router = useRouter();
@@ -36,6 +38,10 @@ export default function CreateWorkflowTaskPage() {
   // Fetch lookup data
   const { data: taskTypes, isLoading: taskTypesLoading } = useTaskTypesLookup(workflowId);
   const { data: taskDependencies, isLoading: dependenciesLoading } = useTaskDependenciesLookup(workflowId);
+  
+  // Fetch existing tasks to calculate next order_sequence
+  const { data: existingTasksResponse } = useWorkflowTasks(workflowId, {});
+  const existingTasks = existingTasksResponse?.data.tasks || [];
 
   const createTaskMutation = useCreateWorkflowTask(workflowId);
 
@@ -46,10 +52,27 @@ export default function CreateWorkflowTaskPage() {
     estimated_duration_hours: 1,
     order_sequence: 1,
     is_required: true,
-    dependencies: null,
-    required_skills: '',
+    dependencies: [],
+    required_skills: [],
     notes: '',
   });
+
+  // Calculate next available order_sequence
+  const getNextOrderSequence = () => {
+    if (existingTasks.length === 0) return 1;
+    const maxOrder = Math.max(...existingTasks.map(t => t.order_sequence));
+    return maxOrder + 1;
+  };
+
+  // Update order_sequence automatically when existing tasks are loaded
+  useEffect(() => {
+    const nextOrder = getNextOrderSequence();
+    setFormData(prev => ({
+      ...prev,
+      order_sequence: nextOrder
+    }));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [existingTasks.length]);
 
   const handleInputChange = (field: keyof CreateWorkflowTaskRequest, value: any) => {
     setFormData(prev => ({
@@ -58,15 +81,84 @@ export default function CreateWorkflowTaskPage() {
     }));
   };
 
+  // Handle dependencies array
+  const toggleDependency = (taskId: number) => {
+    setFormData(prev => {
+      const currentDeps = prev.dependencies || [];
+      const isSelected = currentDeps.includes(taskId);
+      
+      if (isSelected) {
+        // Remove dependency
+        return {
+          ...prev,
+          dependencies: currentDeps.filter((d: number) => d !== taskId)
+        };
+      } else {
+        // Add dependency
+        return {
+          ...prev,
+          dependencies: [...currentDeps, taskId]
+        };
+      }
+    });
+  };
+
+  // Handle required_skills array
+  const addRequiredSkill = () => {
+    setFormData(prev => ({
+      ...prev,
+      required_skills: [...(prev.required_skills || []), '']
+    }));
+  };
+
+  const removeRequiredSkill = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      required_skills: (prev.required_skills || []).filter((_: string, i: number) => i !== index)
+    }));
+  };
+
+  const updateRequiredSkill = (index: number, value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      required_skills: (prev.required_skills || []).map((s: string, i: number) => i === index ? value : s)
+    }));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    // Calculate and set order_sequence automatically
+    const nextOrder = getNextOrderSequence();
+    
+    // Prepare data for submission
+    const dependenciesArray = formData.dependencies && formData.dependencies.length > 0
+      ? formData.dependencies.filter(d => d !== null && d !== undefined)
+      : null;
+    
+    const requiredSkillsArray = formData.required_skills && formData.required_skills.length > 0
+      ? formData.required_skills.filter(s => s && s.trim().length > 0)
+      : null;
+    
+    const submitData: CreateWorkflowTaskRequest = {
+      ...formData,
+      order_sequence: nextOrder, // Set automatically calculated order
+      dependencies: dependenciesArray,
+      required_skills: requiredSkillsArray,
+    };
+    
     try {
-      await createTaskMutation.mutateAsync(formData);
+      await createTaskMutation.mutateAsync(submitData);
       toast.success('Task created successfully!');
       router.push(`/super-admin/services-management/workflow/${workflowId}/tasks`);
-    } catch (error) {
-      toast.error('Failed to create task');
+    } catch (error: any) {
+      // Check for duplicate order_sequence error
+      if (error?.response?.data?.message?.includes('unique_task_order_per_workflow') || 
+          error?.response?.data?.message?.includes('Duplicate entry')) {
+        toast.error(`Order sequence ${formData.order_sequence} is already used. Please choose a different value.`);
+      } else {
+        toast.error(error?.response?.data?.message || 'Failed to create task');
+      }
     }
   };
 
@@ -160,69 +252,108 @@ export default function CreateWorkflowTaskPage() {
                     </Label>
                     <Input
                       id="estimated_duration_hours"
-                      type="number"
-                      min="1"
+                      type="text"
                       value={formData.estimated_duration_hours || ''}
-                      onChange={(e) => handleInputChange('estimated_duration_hours', parseInt(e.target.value) || 1)}
-                      placeholder="1"
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        // Allow only numbers
+                        if (value === '' || /^\d+$/.test(value)) {
+                          handleInputChange('estimated_duration_hours', value === '' ? 1 : parseInt(value) || 1);
+                        }
+                      }}
+                      placeholder="Enter hours"
                       required
                       className="h-11"
                     />
                   </div>
 
-                  {/* Order Sequence */}
-                  <div className="space-y-2">
-                    <Label htmlFor="order_sequence" className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                      Order Sequence *
-                    </Label>
-                    <Input
-                      id="order_sequence"
-                      type="number"
-                      min="1"
-                      value={formData.order_sequence || ''}
-                      onChange={(e) => handleInputChange('order_sequence', parseInt(e.target.value) || 1)}
-                      placeholder="1"
-                      required
-                      className="h-11"
-                    />
-                  </div>
 
                   {/* Dependencies */}
-                  <div className="space-y-2">
-                    <Label htmlFor="dependencies" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  <div className="space-y-2 lg:col-span-2 xl:col-span-3">
+                    <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">
                       Dependencies
                     </Label>
-                    <Select
-                      value={formData.dependencies?.toString() || 'none'}
-                      onValueChange={(value) => handleInputChange('dependencies', value === 'none' ? null : parseInt(value))}
-                      disabled={dependenciesLoading}
-                    >
-                      <SelectTrigger className="h-11">
-                        <SelectValue placeholder={dependenciesLoading ? "Loading dependencies..." : "Select dependency (optional)"} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="none">No Dependencies</SelectItem>
-                        {taskDependencies?.map((dependency) => (
-                          <SelectItem key={dependency.value} value={dependency.value.toString()}>
-                            {dependency.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    {dependenciesLoading ? (
+                      <p className="text-xs text-gray-500 dark:text-gray-400">Loading dependencies...</p>
+                    ) : taskDependencies && taskDependencies.length > 0 ? (
+                      <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 bg-gray-50 dark:bg-gray-800/50 max-h-48 overflow-y-auto">
+                        <div className="space-y-3">
+                          {taskDependencies.map((dependency) => {
+                            const isSelected = formData.dependencies?.includes(dependency.value) || false;
+                            return (
+                              <div key={dependency.value} className="flex items-center space-x-2 space-x-reverse">
+                                <Checkbox
+                                  id={`dependency-${dependency.value}`}
+                                  checked={isSelected}
+                                  onCheckedChange={() => toggleDependency(dependency.value)}
+                                />
+                                <Label
+                                  htmlFor={`dependency-${dependency.value}`}
+                                  className="text-sm font-normal cursor-pointer flex-1"
+                                >
+                                  {dependency.label}
+                                </Label>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    ) : (
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                        No dependencies available. Create tasks first to add dependencies.
+                      </p>
+                    )}
+                    {formData.dependencies && formData.dependencies.length > 0 && (
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                        Selected: {formData.dependencies.length} {formData.dependencies.length === 1 ? 'dependency' : 'dependencies'}
+                      </p>
+                    )}
                   </div>
 
                   {/* Required Skills */}
-                  <div className="space-y-2">
-                    <Label htmlFor="required_skills" className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                      Required Skills
-                    </Label>
-                    <Input
-                      id="required_skills"
-                      value={formData.required_skills}
-                      onChange={(e) => handleInputChange('required_skills', e.target.value)}
-                      placeholder="Enter required skills"
-                      className="h-11"
-                    />
+                  <div className="space-y-2 lg:col-span-2 xl:col-span-3">
+                    <div className="flex items-center justify-between">
+                      <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                        Required Skills
+                      </Label>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={addRequiredSkill}
+                        className="h-8"
+                      >
+                        <PlusIcon className="h-3 w-3 mr-1" />
+                        Add Skill
+                      </Button>
+                    </div>
+                    {formData.required_skills && formData.required_skills.length > 0 ? (
+                      <div className="space-y-2">
+                        {formData.required_skills.map((skill, index) => (
+                          <div key={index} className="flex items-center gap-2">
+                            <Input
+                              value={skill || ''}
+                              onChange={(e) => updateRequiredSkill(index, e.target.value)}
+                              placeholder="Enter skill name"
+                              className="h-10"
+                            />
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => removeRequiredSkill(index)}
+                              className="text-red-600 hover:text-red-800 hover:bg-red-100 dark:text-red-400 dark:hover:text-red-300 dark:hover:bg-red-900 h-10 w-10 p-0"
+                            >
+                              <TrashIcon className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                        No skills added. Click "Add Skill" to add one.
+                      </p>
+                    )}
                   </div>
                 </div>
 

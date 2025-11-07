@@ -126,6 +126,10 @@ export const CHANNEL_TYPE_OPTIONS = [
 export interface CreateOnlineChannelRequest {
   platform: string;
   main_goal: string;
+  pages?: string | null;
+  type_of_content?: string | null;
+  seo?: string | null;
+  notes?: string | null;
 }
 
 export interface UpdateOnlineChannelRequest {
@@ -141,6 +145,10 @@ export interface UpdateOnlineChannelRequest {
 export interface CreateOfflineChannelRequest {
   type: string;
   location: string;
+  agency?: string | null;
+  street?: string | null;
+  type_of_content?: string | null;
+  notes?: string | null;
 }
 
 export interface UpdateOfflineChannelRequest {
@@ -156,6 +164,12 @@ export interface UpdateOfflineChannelRequest {
 export interface CreateInfluencerRequest {
   name: string;
   platform: string;
+  domain?: string | null;
+  followers?: string | number | null;
+  story_views?: string | number | null;
+  post_likes?: string | number | null;
+  content_type?: string | null;
+  notes?: string | null;
 }
 
 export interface UpdateInfluencerRequest {

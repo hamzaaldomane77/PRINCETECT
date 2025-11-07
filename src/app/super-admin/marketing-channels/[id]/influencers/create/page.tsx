@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { ArrowLeftIcon, SaveIcon } from '@/components/ui/icons';
 import {
   useCreateInfluencer,
@@ -24,7 +25,13 @@ export default function CreateInfluencerPage() {
 
   const [formData, setFormData] = useState<CreateInfluencerRequest>({
     name: '',
-    platform: ''
+    platform: '',
+    domain: '',
+    followers: '',
+    story_views: '',
+    post_likes: '',
+    content_type: '',
+    notes: ''
   });
 
   const breadcrumbItems = [
@@ -36,7 +43,7 @@ export default function CreateInfluencerPage() {
 
   const createMutation = useCreateInfluencer(marketingChannelId);
 
-  const handleInputChange = (field: keyof CreateInfluencerRequest, value: string) => {
+  const handleInputChange = (field: keyof CreateInfluencerRequest, value: string | number | null) => {
     setFormData(prev => ({
       ...prev,
       [field]: value
@@ -62,7 +69,7 @@ export default function CreateInfluencerPage() {
 
       await createMutation.mutateAsync(formData);
       toast.success('Influencer created successfully');
-      router.push(`/super-admin/marketing-channels/${marketingChannelId}/edit`);
+      router.push(`/super-admin/marketing-channels`);
     } catch (error) {
       console.error('Error creating influencer:', error);
       const errorMsg = (error as any)?.response?.data?.message || 'Failed to create influencer';
@@ -73,7 +80,7 @@ export default function CreateInfluencerPage() {
   };
 
   const handleCancel = () => {
-    router.push(`/super-admin/marketing-channels/${marketingChannelId}/edit`);
+    router.push(`/super-admin/marketing-channels`);
   };
 
   return (
@@ -122,8 +129,72 @@ export default function CreateInfluencerPage() {
                     id="platform"
                     value={formData.platform}
                     onChange={(e) => handleInputChange('platform', e.target.value)}
-                    placeholder="Enter platform..."
+                    placeholder="Enter platform (e.g., Instagram)"
                     required
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="domain">Domain</Label>
+                  <Input
+                    id="domain"
+                    value={formData.domain || ''}
+                    onChange={(e) => handleInputChange('domain', e.target.value)}
+                    placeholder="Enter domain (e.g., Lifestyle / Fashion)"
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="followers">Followers</Label>
+                    <Input
+                      id="followers"
+                      type="number"
+                      value={formData.followers || ''}
+                      onChange={(e) => handleInputChange('followers', e.target.value ? parseInt(e.target.value) : null)}
+                      placeholder="Enter followers (e.g., 95000)"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="story_views">Story Views</Label>
+                    <Input
+                      id="story_views"
+                      type="number"
+                      value={formData.story_views || ''}
+                      onChange={(e) => handleInputChange('story_views', e.target.value ? parseInt(e.target.value) : null)}
+                      placeholder="Enter story views (e.g., 18000)"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="post_likes">Post Likes</Label>
+                    <Input
+                      id="post_likes"
+                      type="number"
+                      value={formData.post_likes || ''}
+                      onChange={(e) => handleInputChange('post_likes', e.target.value ? parseInt(e.target.value) : null)}
+                      placeholder="Enter post likes (e.g., 3500)"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="content_type">Content Type</Label>
+                  <Input
+                    id="content_type"
+                    value={formData.content_type || ''}
+                    onChange={(e) => handleInputChange('content_type', e.target.value)}
+                    placeholder="Enter content type (e.g., Reels + Collaborations)"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="notes">Notes</Label>
+                  <Textarea
+                    id="notes"
+                    value={formData.notes || ''}
+                    onChange={(e) => handleInputChange('notes', e.target.value)}
+                    placeholder="Enter notes (e.g., Preferred for female audience campaigns)"
+                    rows={4}
                   />
                 </div>
 

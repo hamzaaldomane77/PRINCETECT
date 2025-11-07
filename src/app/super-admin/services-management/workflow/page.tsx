@@ -7,7 +7,7 @@ import { AdminLayout } from '@/components/layout/admin-layout';
 import { Breadcrumb } from '@/components/ui/breadcrumb';
 import { DataTable, Column, ActionButton } from '@/components/ui/data-table';
 import { Button } from '@/components/ui/button';
-import { EyeIcon, EditIcon, TrashIcon, PlusIcon, RefreshIcon } from '@/components/ui/icons';
+import { EyeIcon, EditIcon, TrashIcon, PlusIcon, RefreshIcon, CopyIcon, MoreVerticalIcon } from '@/components/ui/icons';
 import { 
   AlertDialog,
   AlertDialogAction,
@@ -18,7 +18,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { useServiceWorkflows, useDeleteServiceWorkflow, useToggleServiceWorkflowStatus } from '@/modules/service-workflows';
+import { useServiceWorkflows, useDeleteServiceWorkflow, useToggleServiceWorkflowStatus, useDuplicateServiceWorkflow } from '@/modules/service-workflows';
 import { ServiceWorkflow } from '@/modules/service-workflows/types';
 import { toast } from 'sonner';
 
@@ -48,6 +48,7 @@ export default function WorkflowPage() {
   // Mutations
   const deleteWorkflowMutation = useDeleteServiceWorkflow();
   const toggleStatusMutation = useToggleServiceWorkflowStatus();
+  const duplicateWorkflowMutation = useDuplicateServiceWorkflow();
 
   const handleCreateWorkflow = () => {
     router.push('/super-admin/services-management/workflow/create');
@@ -79,6 +80,29 @@ export default function WorkflowPage() {
     }
   };
 
+  const handleDuplicateWorkflow = async (workflow: ServiceWorkflow) => {
+    try {
+      await duplicateWorkflowMutation.mutateAsync(workflow.id);
+      toast.success('Workflow duplicated successfully!');
+      refetch();
+    } catch (error: any) {
+      console.error('Failed to duplicate workflow:', error);
+      
+      // Check if error is due to duplicate entry constraint
+      const errorMessage = error?.response?.data?.message || error?.message || '';
+      const isDuplicateError = 
+        errorMessage.includes('Duplicate entry') ||
+        errorMessage.includes('unique_default_workflow_per_service') ||
+        errorMessage.includes('Integrity constraint violation');
+      
+      if (isDuplicateError) {
+        toast.info('This workflow has already been duplicated previously.');
+      } else {
+        toast.error('Failed to duplicate workflow. Please try again.');
+      }
+    }
+  };
+
   // Define table columns
   const columns: Column[] = [
     { key: 'id', label: 'ID', type: 'text', width: '60px' },
@@ -93,32 +117,42 @@ export default function WorkflowPage() {
     { key: 'actions', label: 'Actions', type: 'actions', align: 'center' }
   ];
 
-  // Define action buttons
+  // Define action buttons with dropdown menu
   const actions: ActionButton[] = [
     {
-      icon: EyeIcon,
-      label: 'View Tasks',
-      color: 'text-blue-600 dark:text-blue-400',
-      hoverColor: 'hover:bg-blue-100 dark:hover:bg-blue-900',
-      onClick: (workflow: ServiceWorkflow) => {
-        router.push(`/super-admin/services-management/workflow/${workflow.id}/tasks`);
-      }
-    },
-    {
-      icon: EditIcon,
-      label: 'Edit Workflow',
-      color: 'text-green-600 dark:text-green-400',
-      hoverColor: 'hover:bg-green-100 dark:hover:bg-green-900',
-      onClick: (workflow: ServiceWorkflow) => {
-        router.push(`/super-admin/services-management/workflow/${workflow.id}/edit`);
-      }
-    },
-    {
-      icon: TrashIcon,
-      label: 'Delete Workflow',
-      color: 'text-red-600 dark:text-red-400',
-      hoverColor: 'hover:bg-red-100 dark:hover:bg-red-900',
-      onClick: handleDeleteWorkflow
+      icon: MoreVerticalIcon,
+      label: 'Actions',
+      color: 'text-gray-600 dark:text-gray-300',
+      hoverColor: 'hover:bg-gray-100 dark:hover:bg-gray-800',
+      onClick: () => {}, // Empty function since we use dropdown
+      dropdownItems: [
+        {
+          icon: EyeIcon,
+          label: 'View Tasks',
+          onClick: (workflow: ServiceWorkflow) => {
+            router.push(`/super-admin/services-management/workflow/${workflow.id}/tasks`);
+          }
+        },
+        {
+          icon: EditIcon,
+          label: 'Edit Workflow',
+          onClick: (workflow: ServiceWorkflow) => {
+            router.push(`/super-admin/services-management/workflow/${workflow.id}/edit`);
+          }
+        },
+        {
+          icon: CopyIcon,
+          label: 'Duplicate',
+          onClick: handleDuplicateWorkflow,
+          className: 'text-purple-600 dark:text-purple-400'
+        },
+        {
+          icon: TrashIcon,
+          label: 'Delete Workflow',
+          onClick: handleDeleteWorkflow,
+          className: 'text-red-600 dark:text-red-400'
+        }
+      ]
     }
   ];
 

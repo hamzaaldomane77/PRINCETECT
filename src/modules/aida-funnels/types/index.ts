@@ -53,6 +53,18 @@ export interface UpdateAidaFunnelRequest {
   pda_document_id?: number;
 }
 
+export interface ReorderAidaFunnelsRequest {
+  funnels: Array<{
+    id: number;
+    order: number;
+  }>;
+}
+
+export interface ReorderAidaFunnelsResponse {
+  success: boolean;
+  message: string;
+}
+
 export type AidaFunnelStage = 'attention' | 'interest' | 'desire' | 'action';
 
 export const AIDA_STAGES: { value: AidaFunnelStage; label: string }[] = [

@@ -12,16 +12,13 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Calendar } from '@/components/ui/calendar';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowLeftIcon, EditIcon, TrashIcon, PlusIcon, CalendarIcon } from '@/components/ui/icons';
+import { ArrowLeftIcon, EditIcon, TrashIcon, PlusIcon } from '@/components/ui/icons';
 import { 
   useContract, 
   useDeleteContract, 
   useAddContractService, 
-  useUpdateContractService, 
   useDeleteContractService
 } from '@/modules/contracts';
 import { useServices } from '@/modules/services';
@@ -33,11 +30,9 @@ interface ContractDetailsPageProps {
 
 export default function ContractDetailsPage({ params }: ContractDetailsPageProps) {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [editServiceDialogOpen, setEditServiceDialogOpen] = useState(false);
   const [deleteServiceDialogOpen, setDeleteServiceDialogOpen] = useState(false);
   const [addServiceDialogOpen, setAddServiceDialogOpen] = useState(false);
   const [currentService, setCurrentService] = useState<any>(null);
-  const [deliveryDateOpen, setDeliveryDateOpen] = useState(false);
   
   const [serviceFormData, setServiceFormData] = useState({
     service_id: '',
@@ -56,7 +51,6 @@ export default function ContractDetailsPage({ params }: ContractDetailsPageProps
   const { data: servicesData } = useServices({ active: true });
   const deleteContractMutation = useDeleteContract();
   const addServiceMutation = useAddContractService();
-  const updateServiceMutation = useUpdateContractService();
   const deleteServiceMutation = useDeleteContractService();
 
   const contract = contractResponse?.data;
@@ -87,18 +81,6 @@ export default function ContractDetailsPage({ params }: ContractDetailsPageProps
     }
   };
 
-  const handleEditService = (service: any) => {
-    setCurrentService(service);
-    setServiceFormData({
-      service_id: service.service_id.toString(),
-      quantity: service.quantity.toString(),
-      unit_price: service.unit_price.toString(),
-      delivery_date: service.delivery_date ? new Date(service.delivery_date).toISOString().split('T')[0] : '',
-      description: service.description || '',
-      notes: service.notes || ''
-    });
-    setEditServiceDialogOpen(true);
-  };
 
   const handleDeleteService = (service: any) => {
     setCurrentService(service);
@@ -147,20 +129,11 @@ export default function ContractDetailsPage({ params }: ContractDetailsPageProps
         notes: serviceFormData.notes || undefined
       };
 
-      if (currentService) {
-        await updateServiceMutation.mutateAsync({
-          contractId,
-          serviceId: currentService.id,
-          data
-        });
-        setEditServiceDialogOpen(false);
-      } else {
-        await addServiceMutation.mutateAsync({
-          contractId,
-          data
-        });
-        setAddServiceDialogOpen(false);
-      }
+      await addServiceMutation.mutateAsync({
+        contractId,
+        data
+      });
+      setAddServiceDialogOpen(false);
       
       resetServiceForm();
     } catch (error) {
@@ -189,22 +162,6 @@ export default function ContractDetailsPage({ params }: ContractDetailsPageProps
     return new Date(date).toLocaleDateString('en-CA'); // YYYY-MM-DD format
   };
 
-  // Helper function to format date to YYYY-MM-DD without timezone issues
-  const formatDateToISO = (date: Date) => {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
-  };
-
-  // Helper function to handle date selection
-  const handleDateSelect = (date: Date | undefined) => {
-    if (date) {
-      const formattedDate = formatDateToISO(date);
-      setServiceFormData(prev => ({ ...prev, delivery_date: formattedDate }));
-    }
-    setDeliveryDateOpen(false);
-  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -484,13 +441,6 @@ export default function ContractDetailsPage({ params }: ContractDetailsPageProps
                                 <div className="flex items-center gap-2 ml-4">
                                   <Button
                                     size="sm"
-                                    variant="outline"
-                                    onClick={() => handleEditService(contractService)}
-                                  >
-                                    <EditIcon className="h-3 w-3" />
-                                  </Button>
-                                  <Button
-                                    size="sm"
                                     variant="destructive"
                                     onClick={() => handleDeleteService(contractService)}
                                   >
@@ -549,19 +499,16 @@ export default function ContractDetailsPage({ params }: ContractDetailsPageProps
           </div>
         </div>
 
-        {/* Add/Edit Service Dialog */}
-        <Dialog open={addServiceDialogOpen || editServiceDialogOpen} onOpenChange={(open) => {
+        {/* Add Service Dialog */}
+        <Dialog open={addServiceDialogOpen} onOpenChange={(open) => {
           if (!open) {
             setAddServiceDialogOpen(false);
-            setEditServiceDialogOpen(false);
             resetServiceForm();
           }
         }}>
           <DialogContent className="max-w-md">
             <DialogHeader>
-              <DialogTitle>
-                {currentService ? 'Edit Service' : 'Add Service'}
-              </DialogTitle>
+              <DialogTitle>Add Service</DialogTitle>
             </DialogHeader>
             <form onSubmit={handleServiceFormSubmit} className="space-y-4">
               <div>
@@ -611,28 +558,15 @@ export default function ContractDetailsPage({ params }: ContractDetailsPageProps
 
               <div>
                 <Label htmlFor="delivery_date">Delivery Date *</Label>
-                <Popover open={deliveryDateOpen} onOpenChange={setDeliveryDateOpen}>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className={`w-full justify-start text-left font-normal ${
-                        !serviceFormData.delivery_date && 'text-muted-foreground'
-                      }`}
-                    >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {serviceFormData.delivery_date ? formatDate(serviceFormData.delivery_date) : 'Select delivery date'}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={serviceFormData.delivery_date ? new Date(serviceFormData.delivery_date) : undefined}
-                      onSelect={handleDateSelect}
-                      disabled={(date) => date < new Date('1900-01-01')}
-                      initialFocus
-                    />
-                  </PopoverContent>
-                </Popover>
+                <Input
+                  id="delivery_date"
+                  type="date"
+                  value={serviceFormData.delivery_date}
+                  onChange={(e) => setServiceFormData(prev => ({ ...prev, delivery_date: e.target.value }))}
+                  required
+                  min="1900-01-01"
+                  className="w-full"
+                />
               </div>
 
               <div>
@@ -663,7 +597,6 @@ export default function ContractDetailsPage({ params }: ContractDetailsPageProps
                   variant="outline"
                   onClick={() => {
                     setAddServiceDialogOpen(false);
-                    setEditServiceDialogOpen(false);
                     resetServiceForm();
                   }}
                 >
@@ -671,15 +604,15 @@ export default function ContractDetailsPage({ params }: ContractDetailsPageProps
                 </Button>
                 <Button
                   type="submit"
-                  disabled={addServiceMutation.isPending || updateServiceMutation.isPending}
+                  disabled={addServiceMutation.isPending}
                 >
-                  {(addServiceMutation.isPending || updateServiceMutation.isPending) ? (
+                  {addServiceMutation.isPending ? (
                     <>
                       <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                      {currentService ? 'Updating...' : 'Adding...'}
+                      Adding...
                     </>
                   ) : (
-                    currentService ? 'Update Service' : 'Add Service'
+                    'Add Service'
                   )}
                 </Button>
               </div>

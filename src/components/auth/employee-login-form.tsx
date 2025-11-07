@@ -6,13 +6,13 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
 import { useEmployeeAuth } from '@/contexts/employee-auth-context';
-import { LoginCredentials } from '@/types/auth';
+import { EmployeeLoginCredentials } from '@/modules/employee-auth';
 import Image from 'next/image';
 import toast, { Toaster } from 'react-hot-toast';
 import { EyeIcon, EyeOffIcon } from '@/components/ui/icons';
 
 export default function EmployeeLoginForm() {
-  const [credentials, setCredentials] = useState<LoginCredentials>({ email: '', password: '' });
+  const [credentials, setCredentials] = useState<EmployeeLoginCredentials>({ email: '', password: '' });
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
@@ -21,7 +21,7 @@ export default function EmployeeLoginForm() {
 
   useEffect(() => {
     if (isAuthenticated && user) {
-      toast.success(`مرحباً ${user.name}! تم تسجيل الدخول بنجاح`);
+      toast.success(`مرحباً ${user.full_name}! تم تسجيل الدخول بنجاح`);
       
       // Redirect to employee dashboard after a short delay
       setTimeout(() => {
@@ -54,19 +54,11 @@ export default function EmployeeLoginForm() {
     }
   };
 
-  const handleInputChange = (field: keyof LoginCredentials, value: string) => {
+  const handleInputChange = (field: keyof EmployeeLoginCredentials, value: string) => {
     setCredentials(prev => ({
       ...prev,
       [field]: value
     }));
-    if (error) setError('');
-  };
-
-  const fillDemoCredentials = () => {
-    setCredentials({
-      email: 'employee@demo.com',
-      password: 'employee123'
-    });
     if (error) setError('');
   };
 
@@ -184,39 +176,6 @@ export default function EmployeeLoginForm() {
               </Button>
             </form>
 
-            {/* Demo Credentials */}
-            <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-md">
-              <div className="flex items-start justify-between mb-2">
-                <p className="text-sm font-semibold text-blue-900 dark:text-blue-100">
-                  🔐 بيانات الدخول التجريبية:
-                </p>
-                <button
-                  type="button"
-                  onClick={fillDemoCredentials}
-                  className="text-xs bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded transition-colors"
-                  disabled={isLoading}
-                >
-                  ملء تلقائي
-                </button>
-              </div>
-              <div className="text-sm text-blue-700 dark:text-blue-300 space-y-1">
-                <p>البريد الإلكتروني: <code className="bg-blue-100 dark:bg-blue-900/40 px-2 py-1 rounded">employee@demo.com</code></p>
-                <p>كلمة المرور: <code className="bg-blue-100 dark:bg-blue-900/40 px-2 py-1 rounded">employee123</code></p>
-              </div>
-            </div>
-
-            {/* Link to Super Admin Login */}
-            <div className="mt-6 text-center">
-              <p className="text-sm text-gray-600 dark:text-gray-400">
-                هل أنت مدير؟{' '}
-                <a 
-                  href="/" 
-                  className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-medium"
-                >
-                  تسجيل دخول المدير
-                </a>
-              </p>
-            </div>
           </CardContent>
         </Card>
       </div>

@@ -34,8 +34,8 @@ export interface CreateWorkflowTaskRequest {
   estimated_duration_hours: number;
   order_sequence: number;
   is_required: boolean;
-  dependencies?: number | null;
-  required_skills?: string;
+  dependencies?: number[] | null;
+  required_skills?: string[] | null;
   notes?: string;
 }
 
@@ -46,8 +46,8 @@ export interface UpdateWorkflowTaskRequest {
   estimated_duration_hours?: number;
   order_sequence?: number;
   is_required?: boolean;
-  dependencies?: number | null;
-  required_skills?: string;
+  dependencies?: number[] | null;
+  required_skills?: string[] | null;
   notes?: string;
 }
 

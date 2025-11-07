@@ -39,14 +39,17 @@ export default function EditWorkflowTaskPage() {
 
   const updateTaskMutation = useUpdateWorkflowTask(workflowId, taskId);
 
-  const [formData, setFormData] = useState<UpdateWorkflowTaskRequest>({
+  const [formData, setFormData] = useState<Omit<UpdateWorkflowTaskRequest, 'dependencies' | 'required_skills'> & {
+    dependencies: string; // Store as comma-separated string in form
+    required_skills: string; // Store as comma-separated string in form
+  }>({
     name: '',
     description: '',
     task_type: '',
     estimated_duration_hours: 1,
     order_sequence: 1,
     is_required: true,
-    dependencies: null,
+    dependencies: '',
     required_skills: '',
     notes: '',
   });
@@ -54,6 +57,28 @@ export default function EditWorkflowTaskPage() {
   // Populate form data when task is loaded
   useEffect(() => {
     if (currentTask) {
+      // Convert dependencies to comma-separated string
+      // Handle both number | null (old format) and number[] (new format)
+      let dependenciesStr = '';
+      if (currentTask.dependencies !== null && currentTask.dependencies !== undefined) {
+        if (Array.isArray(currentTask.dependencies)) {
+          dependenciesStr = currentTask.dependencies.join(', ');
+        } else {
+          dependenciesStr = currentTask.dependencies.toString();
+        }
+      }
+      
+      // Convert required_skills to comma-separated string
+      // Handle both string | null (old format) and string[] (new format)
+      let requiredSkillsStr = '';
+      if (currentTask.required_skills !== null && currentTask.required_skills !== undefined) {
+        if (Array.isArray(currentTask.required_skills)) {
+          requiredSkillsStr = currentTask.required_skills.join(', ');
+        } else {
+          requiredSkillsStr = currentTask.required_skills;
+        }
+      }
+      
       setFormData({
         name: currentTask.name || '',
         description: currentTask.description || '',
@@ -61,8 +86,8 @@ export default function EditWorkflowTaskPage() {
         estimated_duration_hours: currentTask.estimated_duration_hours || 1,
         order_sequence: currentTask.order_sequence || 1,
         is_required: currentTask.is_required ?? true,
-        dependencies: currentTask.dependencies,
-        required_skills: currentTask.required_skills || '',
+        dependencies: dependenciesStr,
+        required_skills: requiredSkillsStr,
         notes: currentTask.notes || '',
       });
     }
@@ -78,8 +103,23 @@ export default function EditWorkflowTaskPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    // Convert comma-separated strings to arrays
+    const dependenciesArray = formData.dependencies
+      ? formData.dependencies.split(',').map(d => parseInt(d.trim())).filter(d => !isNaN(d))
+      : null;
+    
+    const requiredSkillsArray = formData.required_skills
+      ? formData.required_skills.split(',').map(s => s.trim()).filter(s => s.length > 0)
+      : null;
+    
+    const submitData: UpdateWorkflowTaskRequest = {
+      ...formData,
+      dependencies: dependenciesArray && dependenciesArray.length > 0 ? dependenciesArray : null,
+      required_skills: requiredSkillsArray && requiredSkillsArray.length > 0 ? requiredSkillsArray : null,
+    };
+    
     try {
-      await updateTaskMutation.mutateAsync(formData);
+      await updateTaskMutation.mutateAsync(submitData);
       toast.success('Task updated successfully!');
       router.push(`/super-admin/services-management/workflow/${workflowId}/tasks`);
     } catch (error) {
@@ -254,39 +294,35 @@ export default function EditWorkflowTaskPage() {
                   {/* Dependencies */}
                   <div className="space-y-2">
                     <Label htmlFor="dependencies" className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                      Dependencies
+                      Dependencies (Task IDs, comma-separated)
                     </Label>
-                    <Select
-                      value={formData.dependencies?.toString() || 'none'}
-                      onValueChange={(value) => handleInputChange('dependencies', value === 'none' ? null : parseInt(value))}
-                      disabled={dependenciesLoading}
-                    >
-                      <SelectTrigger className="h-11">
-                        <SelectValue placeholder={dependenciesLoading ? "Loading dependencies..." : "Select dependency (optional)"} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="none">No Dependencies</SelectItem>
-                        {taskDependencies?.map((dependency) => (
-                          <SelectItem key={dependency.value} value={dependency.value.toString()}>
-                            {dependency.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <Input
+                      id="dependencies"
+                      value={formData.dependencies}
+                      onChange={(e) => handleInputChange('dependencies', e.target.value)}
+                      placeholder="e.g., 1, 2, 3"
+                      className="h-11"
+                    />
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                      Enter task IDs separated by commas (e.g., 1, 2, 3)
+                    </p>
                   </div>
 
                   {/* Required Skills */}
                   <div className="space-y-2">
                     <Label htmlFor="required_skills" className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                      Required Skills
+                      Required Skills (comma-separated)
                     </Label>
                     <Input
                       id="required_skills"
                       value={formData.required_skills}
                       onChange={(e) => handleInputChange('required_skills', e.target.value)}
-                      placeholder="Enter required skills"
+                      placeholder="e.g., JavaScript, React, Node.js"
                       className="h-11"
                     />
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                      Enter skills separated by commas (e.g., JavaScript, React, Node.js)
+                    </p>
                   </div>
                 </div>
 

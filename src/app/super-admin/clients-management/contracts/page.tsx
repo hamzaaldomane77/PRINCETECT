@@ -13,9 +13,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Calendar } from '@/components/ui/calendar';
-import { EyeIcon, EditIcon, TrashIcon, PlusIcon, RefreshIcon, MoreVerticalIcon, CalendarIcon } from '@/components/ui/icons';
+import { EyeIcon, EditIcon, TrashIcon, PlusIcon, RefreshIcon, MoreVerticalIcon } from '@/components/ui/icons';
 import { 
   AlertDialog,
   AlertDialogAction,
@@ -53,7 +51,6 @@ export default function ContractsPage() {
   // Add service modal state
   const [addServiceModalOpen, setAddServiceModalOpen] = useState(false);
   const [currentContract, setCurrentContract] = useState<Contract | null>(null);
-  const [deliveryDateOpen, setDeliveryDateOpen] = useState(false);
   const [serviceFormData, setServiceFormData] = useState({
     service_id: '',
     quantity: '1',
@@ -125,22 +122,6 @@ export default function ContractsPage() {
     return new Date(date).toLocaleDateString('en-CA'); // YYYY-MM-DD format
   };
 
-  // Helper function to format date to YYYY-MM-DD without timezone issues
-  const formatDateToISO = (date: Date) => {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
-  };
-
-  // Helper function to handle date selection
-  const handleDateSelect = (date: Date | undefined) => {
-    if (date) {
-      const formattedDate = formatDateToISO(date);
-      setServiceFormData(prev => ({ ...prev, delivery_date: formattedDate }));
-    }
-    setDeliveryDateOpen(false);
-  };
 
   const handleServiceChange = (serviceId: string) => {
     const selectedService = services.find((s: any) => s.id.toString() === serviceId);
@@ -534,30 +515,15 @@ export default function ContractsPage() {
                 <Label htmlFor="delivery_date" className="text-right">
                   Delivery Date
                 </Label>
-                <div className="col-span-3">
-                  <Popover open={deliveryDateOpen} onOpenChange={setDeliveryDateOpen}>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        className={`w-full justify-start text-left font-normal ${
-                          !serviceFormData.delivery_date && 'text-muted-foreground'
-                        }`}
-                      >
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        {serviceFormData.delivery_date ? formatDate(serviceFormData.delivery_date) : 'Select delivery date'}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar
-                        mode="single"
-                        selected={serviceFormData.delivery_date ? new Date(serviceFormData.delivery_date) : undefined}
-                        onSelect={handleDateSelect}
-                        disabled={(date) => date < new Date('1900-01-01')}
-                        initialFocus
-                      />
-                    </PopoverContent>
-                  </Popover>
-                </div>
+                <Input
+                  id="delivery_date"
+                  type="date"
+                  value={serviceFormData.delivery_date}
+                  onChange={(e) => setServiceFormData(prev => ({ ...prev, delivery_date: e.target.value }))}
+                  required
+                  min="1900-01-01"
+                  className="col-span-3"
+                />
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="description" className="text-right">
