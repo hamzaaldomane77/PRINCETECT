@@ -11,9 +11,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { EyeIcon, EditIcon, TrashIcon, PlusIcon, RefreshIcon, MoreVerticalIcon } from '@/components/ui/icons';
+import { EyeIcon, EditIcon, TrashIcon, PlusIcon, RefreshIcon, MoreVerticalIcon, CheckCircleIcon } from '@/components/ui/icons';
 import { 
   AlertDialog,
   AlertDialogAction,
@@ -187,10 +186,46 @@ export default function ContractsPage() {
     { key: 'id', label: 'ID', type: 'text', width: '60px' },
     { key: 'contract_number', label: 'Contract Number', type: 'text', align: 'left' },
     { key: 'title', label: 'Title', type: 'text', align: 'left' },
-    { key: 'client', label: 'Client', type: 'text', align: 'left' },
-    { key: 'total_amount', label: 'Total Amount', type: 'text', align: 'right' },
-    { key: 'status', label: 'Status', type: 'text', align: 'center' },
-    { key: 'payment_terms', label: 'Payment Terms', type: 'text', align: 'center' },
+    { 
+      key: 'client', 
+      label: 'Client', 
+      type: 'custom', 
+      align: 'left',
+      render: (contract: any) => (
+        <div className="flex flex-col">
+          <span className="font-medium text-gray-900 dark:text-white">{contract.client_name}</span>
+          {contract.client_company && (
+            <span className="text-sm text-gray-500 dark:text-gray-400">{contract.client_company}</span>
+          )}
+        </div>
+      )
+    },
+    { 
+      key: 'total_amount', 
+      label: 'Total Amount', 
+      type: 'custom', 
+      align: 'right',
+      render: (contract: any) => (
+        <div className="text-right">
+          <span className="font-medium">{parseFloat(contract.total_amount).toLocaleString()}</span>
+          <span className="text-sm text-gray-500 dark:text-gray-400 ml-1">{contract.currency}</span>
+        </div>
+      )
+    },
+    { 
+      key: 'status', 
+      label: 'Status', 
+      type: 'badge', 
+      align: 'center',
+      badgeColors: statusColors
+    },
+    { 
+      key: 'payment_terms', 
+      label: 'Payment Terms', 
+      type: 'badge', 
+      align: 'center',
+      badgeColors: paymentTermsColors
+    },
     { key: 'start_date', label: 'Start Date', type: 'date', align: 'center' },
     { key: 'end_date', label: 'End Date', type: 'date', align: 'center' },
     { key: 'created_at', label: 'Created At', type: 'date', align: 'right' },
@@ -227,6 +262,14 @@ export default function ContractsPage() {
           className: 'text-purple-600 dark:text-purple-400'
         },
         {
+          icon: CheckCircleIcon,
+          label: 'View Tasks',
+          onClick: (contract: Contract) => {
+            router.push(`/super-admin/clients-management/contracts/${contract.id}/tasks`);
+          },
+          className: 'text-blue-600 dark:text-blue-400'
+        },
+        {
           icon: TrashIcon,
           label: 'Delete Contract',
           onClick: handleDeleteContract,
@@ -252,38 +295,18 @@ export default function ContractsPage() {
 
   // Transform contracts data for the table
   const transformedContracts = contracts.map(contract => ({
-    ...contract,
-    client: contract.client ? (
-      <div className="flex flex-col">
-        <span className="font-medium text-gray-900 dark:text-white">{contract.client.name}</span>
-        {contract.client.company_name && (
-          <span className="text-sm text-gray-500 dark:text-gray-400">{contract.client.company_name}</span>
-        )}
-      </div>
-    ) : contract.lead ? (
-      <div className="flex flex-col">
-        <span className="font-medium text-gray-900 dark:text-white">{contract.lead.name}</span>
-        {contract.lead.company_name && (
-          <span className="text-sm text-gray-500 dark:text-gray-400">{contract.lead.company_name}</span>
-        )}
-      </div>
-    ) : '-',
-    total_amount: (
-      <div className="text-right">
-        <span className="font-medium">{parseFloat(contract.total_amount).toLocaleString()}</span>
-        <span className="text-sm text-gray-500 dark:text-gray-400 ml-1">{contract.currency}</span>
-      </div>
-    ),
-    status: (
-      <Badge className={statusColors[contract.status] || statusColors.active}>
-        {contract.status.toUpperCase()}
-      </Badge>
-    ),
-    payment_terms: (
-      <Badge className={paymentTermsColors[contract.payment_terms] || paymentTermsColors.upfront}>
-        {contract.payment_terms.replace('_', ' ').toUpperCase()}
-      </Badge>
-    ),
+    id: contract.id,
+    contract_number: contract.contract_number,
+    title: contract.title,
+    // Extract client name and company for custom render
+    client_name: contract.client?.name || contract.lead?.name || '-',
+    client_company: contract.client?.company_name || contract.lead?.company_name || null,
+    // Keep numeric values for custom render
+    total_amount: contract.total_amount,
+    currency: contract.currency,
+    // Return simple string values for badges - DataTable will handle badge rendering
+    status: contract.status,
+    payment_terms: contract.payment_terms,
     // Pass dates as-is, let DataTable handle formatting
     start_date: contract.start_date,
     end_date: contract.end_date,

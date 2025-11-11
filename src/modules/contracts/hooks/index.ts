@@ -191,3 +191,13 @@ export function useDeleteContractService() {
     },
   });
 }
+
+// Contract Tasks Hook (Read-only)
+export function useContractTasks(contractId: number) {
+  return useQuery({
+    queryKey: [...contractsQueryKeys.all, 'tasks', contractId] as const,
+    queryFn: () => ContractsApi.getContractTasks(contractId),
+    enabled: !!contractId,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+}

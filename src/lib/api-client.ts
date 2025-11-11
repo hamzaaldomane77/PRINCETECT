@@ -8,7 +8,10 @@ export class ApiClient {
   
   // Get authentication headers
   private getAuthHeaders(): HeadersInit {
-    const token = localStorage.getItem('auth-token');
+    // Check for employee token first, then admin token
+    const employeeToken = localStorage.getItem('employee-auth-token');
+    const adminToken = localStorage.getItem('auth-token');
+    const token = employeeToken || adminToken;
     
     return {
       'Content-Type': 'application/json',
@@ -179,7 +182,10 @@ export class ApiClient {
   // POST request specifically for FormData
   async postFormData<T>(endpoint: string, formData: FormData, options?: RequestInit): Promise<T> {
     const url = `${this.baseURL}${endpoint}`;
-    const token = localStorage.getItem('auth-token');
+    // Check for employee token first, then admin token
+    const employeeToken = localStorage.getItem('employee-auth-token');
+    const adminToken = localStorage.getItem('auth-token');
+    const token = employeeToken || adminToken;
     
     const headers: HeadersInit = {
       'Accept': 'application/json',
@@ -190,6 +196,35 @@ export class ApiClient {
     
     const response = await fetch(url, {
       method: 'POST',
+      headers,
+      body: formData,
+      ...options,
+    });
+    
+    if (!response.ok) {
+      await this.handleError(response);
+    }
+    
+    return response.json();
+  }
+
+  // PUT request specifically for FormData
+  async putFormData<T>(endpoint: string, formData: FormData, options?: RequestInit): Promise<T> {
+    const url = `${this.baseURL}${endpoint}`;
+    // Check for employee token first, then admin token
+    const employeeToken = localStorage.getItem('employee-auth-token');
+    const adminToken = localStorage.getItem('auth-token');
+    const token = employeeToken || adminToken;
+    
+    const headers: HeadersInit = {
+      'Accept': 'application/json',
+      ...(token && { 'Authorization': `Bearer ${token}` }),
+      ...options?.headers,
+    };
+    // Don't set Content-Type for FormData - let browser set it with boundary
+    
+    const response = await fetch(url, {
+      method: 'PUT',
       headers,
       body: formData,
       ...options,
@@ -231,10 +266,21 @@ export class ApiClient {
     // Handle specific HTTP status codes
     switch (response.status) {
       case 401:
-        // Unauthorized - clear auth and redirect to login
+        // Unauthorized - clear auth and redirect to appropriate login page
+        const isEmployeePath = window.location.pathname.startsWith('/employee');
+        
+        // Clear all auth tokens
         localStorage.removeItem('auth-token');
         localStorage.removeItem('auth-user');
-        window.location.href = '/';
+        localStorage.removeItem('employee-auth-token');
+        localStorage.removeItem('employee-auth-user');
+        
+        // Redirect to appropriate login page
+        if (isEmployeePath) {
+          window.location.href = '/employee/login';
+        } else {
+          window.location.href = '/';
+        }
         error.message = 'Authentication required. Please log in.';
         break;
         
@@ -264,13 +310,16 @@ export class ApiClient {
   
   // Check if user is authenticated
   isAuthenticated(): boolean {
-    const token = localStorage.getItem('auth-token');
-    return !!token;
+    const employeeToken = localStorage.getItem('employee-auth-token');
+    const adminToken = localStorage.getItem('auth-token');
+    return !!(employeeToken || adminToken);
   }
   
   // Get current auth token
   getAuthToken(): string | null {
-    return localStorage.getItem('auth-token');
+    const employeeToken = localStorage.getItem('employee-auth-token');
+    const adminToken = localStorage.getItem('auth-token');
+    return employeeToken || adminToken;
   }
 }
 

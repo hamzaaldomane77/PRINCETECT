@@ -30,7 +30,7 @@ export default function EmployeeHeader() {
   const handleLogout = async () => {
     try {
       // Show logout toast
-      toast.success('تم تسجيل الخروج بنجاح');
+      toast.success('Logged out successfully');
       
       // Perform logout
       await logout();
@@ -52,7 +52,7 @@ export default function EmployeeHeader() {
       }, 500);
     } catch (error) {
       console.error('Logout error:', error);
-      toast.error('حدث خطأ أثناء تسجيل الخروج');
+      toast.error('An error occurred during logout');
       // Force redirect even on error
       window.location.href = '/employee/login';
     }
@@ -73,7 +73,7 @@ export default function EmployeeHeader() {
             <div className="relative">
               <Input
                 type="text"
-                placeholder="بحث"
+                placeholder="Search"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-64 pl-3 pr-10 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:text-white"
@@ -103,7 +103,7 @@ export default function EmployeeHeader() {
               <div className="flex items-center space-x-2">
                 <div className="text-right">
                   <p className="text-sm font-medium text-gray-900 dark:text-white">
-                    {user?.full_name || 'موظف'}
+                    {user?.full_name || 'Employee'}
                   </p>
                   <p className="text-xs text-gray-500 dark:text-gray-400">
                     {user?.email || 'employee@example.com'}
@@ -114,7 +114,7 @@ export default function EmployeeHeader() {
                   size="sm" 
                   className="p-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800"
                   onClick={() => router.push('/employee/profile')}
-                  title="الملف الشخصي"
+                  title="Profile"
                 >
                   <UserIcon className="w-6 h-6 text-gray-600 dark:text-gray-300" />
                 </Button>
@@ -141,26 +141,26 @@ export default function EmployeeHeader() {
                     variant="outline" 
                     size="sm" 
                     className="px-3 py-2 hover:bg-red-50 hover:text-red-600 hover:border-red-300 dark:hover:bg-red-900/20 dark:hover:text-red-400 dark:hover:border-red-600 transition-colors cursor-pointer"
-                    title="تسجيل الخروج"
+                    title="Logout"
                   >
                     <LogoutIcon className="w-4 h-4 mr-2" />
-                    <span className="text-sm">تسجيل الخروج</span>
+                    <span className="text-sm">Logout</span>
                   </Button>
                 </AlertDialogTrigger>
                 <AlertDialogContent className="max-w-md mx-auto">
                   <AlertDialogHeader>
-                    <AlertDialogTitle>تأكيد تسجيل الخروج</AlertDialogTitle>
+                    <AlertDialogTitle>Confirm Logout</AlertDialogTitle>
                     <AlertDialogDescription>
-                      هل أنت متأكد من تسجيل الخروج من النظام؟
+                      Are you sure you want to logout?
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>
-                    <AlertDialogCancel>إلغاء</AlertDialogCancel>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
                     <AlertDialogAction 
                       onClick={handleLogout}
                       className="bg-red-600 hover:bg-red-700 text-white"
                     >
-                      تسجيل الخروج
+                      Logout
                     </AlertDialogAction>
                   </AlertDialogFooter>
                 </AlertDialogContent>

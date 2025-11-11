@@ -66,6 +66,8 @@ export default function EditLeadPage({ params }: EditLeadPageProps) {
   const [validationErrors, setValidationErrors] = useState<Record<string, string[]>>({});
   const [expectedClosingDateOpen, setExpectedClosingDateOpen] = useState(false);
   const [expectedClosingDateCaptionLayout, setExpectedClosingDateCaptionLayout] = useState<"dropdown" | "dropdown-months" | "dropdown-years">("dropdown");
+  const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [logoPreview, setLogoPreview] = useState<string | null>(null);
 
   // Fetch lead data and lookup data
   const { data: leadResponse, isLoading, error } = useLead(leadId);
@@ -79,6 +81,32 @@ export default function EditLeadPage({ params }: EditLeadPageProps) {
   const employees = employeesResponse?.data?.employees || [];
 
   const lead = leadResponse?.data;
+  
+  // Debug: Log cities and employees when loaded
+  useEffect(() => {
+    if (cities.length > 0) {
+      console.log('Cities loaded:', cities);
+    }
+  }, [cities]);
+  
+  useEffect(() => {
+    if (employees.length > 0) {
+      console.log('Employees loaded:', employees);
+    }
+  }, [employees]);
+  
+  // Debug: Log formData when it changes
+  useEffect(() => {
+    console.log('Current formData:', {
+      city_id: formData.city_id,
+      assigned_to: formData.assigned_to,
+      source: formData.source,
+      industry: formData.industry,
+      size: formData.size,
+      status: formData.status,
+      priority: formData.priority,
+    });
+  }, [formData]);
 
   const breadcrumbItems = [
     { label: 'Clients Management', href: '/super-admin/clients-management' },
@@ -89,6 +117,8 @@ export default function EditLeadPage({ params }: EditLeadPageProps) {
   // Populate form when lead data is loaded
   useEffect(() => {
     if (lead) {
+      console.log('Lead data from API:', lead);
+      
       setFormData({
         name: lead.name,
         company_name: lead.company_name,
@@ -119,6 +149,22 @@ export default function EditLeadPage({ params }: EditLeadPageProps) {
         annual_revenue: lead.annual_revenue,
         is_active: Boolean(lead.is_active),
       });
+      
+      console.log('FormData set with values:', {
+        status: lead.status,
+        priority: lead.priority,
+        source: lead.source,
+        industry: lead.industry,
+        size: lead.size,
+        city_id: lead.city_id,
+        assigned_to: lead.assigned_to,
+      });
+      
+      // Set logo preview if exists
+      if (lead.logo) {
+        const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL?.replace('/api/v1', '') || 'http://localhost:8000';
+        setLogoPreview(`${apiBaseUrl}/storage/${lead.logo}`);
+      }
     }
   }, [lead]);
 
@@ -177,6 +223,38 @@ export default function EditLeadPage({ params }: EditLeadPageProps) {
 
   const handleSwitchChange = (name: keyof UpdateLeadRequest, checked: boolean) => {
     setFormData(prev => ({ ...prev, [name]: checked }));
+  };
+
+  const handleLogoChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please select a valid image file');
+      return;
+    }
+
+    // Validate file size (5MB max)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Logo file size must be less than 5MB');
+      return;
+    }
+
+    setLogoFile(file);
+
+    // Create preview
+    const reader = new FileReader();
+    reader.onloadend = (e) => {
+      setLogoPreview(e.target?.result as string);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const removeLogo = () => {
+    setLogoFile(null);
+    setLogoPreview(null);
+    // Don't remove from formData.logo, as it might be the existing logo
   };
 
   // Helper function to format date for display
@@ -250,16 +328,36 @@ export default function EditLeadPage({ params }: EditLeadPageProps) {
     setLoading(true);
 
     try {
-      // Clean formData: remove empty strings, null, and undefined values
-      const dataToSend: UpdateLeadRequest = {};
-      for (const key in formData) {
-        const value = formData[key as keyof UpdateLeadRequest];
-        if (value !== '' && value !== null && value !== undefined) {
-          (dataToSend as any)[key] = value;
+      // If there's a new logo file, we need to use FormData
+      if (logoFile) {
+        const formDataToSend = new FormData();
+        
+        // Append all form fields
+        for (const key in formData) {
+          const value = formData[key as keyof UpdateLeadRequest];
+          if (value !== '' && value !== null && value !== undefined) {
+            formDataToSend.append(key, String(value));
+          }
         }
-      }
+        
+        // Append logo file
+        formDataToSend.append('logo', logoFile);
+        
+        await updateLeadMutation.mutateAsync({ id: leadId, data: formDataToSend as any });
+      } else {
+        // Clean formData: remove empty strings, null, and undefined values
+        const dataToSend: UpdateLeadRequest = {};
+        for (const key in formData) {
+          const value = formData[key as keyof UpdateLeadRequest];
+          if (value !== '' && value !== null && value !== undefined) {
+            (dataToSend as any)[key] = value;
+          }
+        }
 
-      await updateLeadMutation.mutateAsync({ id: leadId, data: dataToSend });
+        await updateLeadMutation.mutateAsync({ id: leadId, data: dataToSend });
+      }
+      
+      toast.success('Lead updated successfully!');
       router.push('/super-admin/clients-management/potential-clients');
     } catch (err: any) {
       const apiErrors = err?.response?.data?.errors;
@@ -454,11 +552,20 @@ export default function EditLeadPage({ params }: EditLeadPageProps) {
                       <div className="space-y-2">
                         <Label htmlFor="city_id">City</Label>
                         <Select
-                          value={formData.city_id?.toString() || ''}
-                          onValueChange={(value) => handleDirectSelectChange('city_id', value ? parseInt(value) : null)}
+                          value={formData.city_id ? formData.city_id.toString() : undefined}
+                          onValueChange={(value) => {
+                            console.log('City selected:', value);
+                            handleDirectSelectChange('city_id', value ? parseInt(value) : null);
+                          }}
                         >
                           <SelectTrigger>
-                            <SelectValue placeholder="Select city" />
+                            <SelectValue placeholder="Select city">
+                              {formData.city_id && cities.length > 0 ? (
+                                cities.find((c: any) => c.id === formData.city_id)?.name || 'Unknown City'
+                              ) : (
+                                'Select city'
+                              )}
+                            </SelectValue>
                           </SelectTrigger>
                           <SelectContent>
                             {cities.map((city: any) => (
@@ -468,6 +575,7 @@ export default function EditLeadPage({ params }: EditLeadPageProps) {
                             ))}
                           </SelectContent>
                         </Select>
+                        <p className="text-xs text-gray-500">Current value: {formData.city_id || 'none'} | Available cities: {cities.length}</p>
                       </div>
                     </div>
 
@@ -502,7 +610,7 @@ export default function EditLeadPage({ params }: EditLeadPageProps) {
                       <div className="space-y-2">
                         <Label htmlFor="industry">Industry</Label>
                         <Select
-                          value={formData.industry || ''}
+                          value={formData.industry || undefined}
                           onValueChange={(value) => handleDirectSelectChange('industry', value)}
                         >
                           <SelectTrigger>
@@ -524,7 +632,7 @@ export default function EditLeadPage({ params }: EditLeadPageProps) {
                       <div className="space-y-2">
                         <Label htmlFor="size">Company Size</Label>
                         <Select
-                          value={formData.size || ''}
+                          value={formData.size || undefined}
                           onValueChange={(value) => handleDirectSelectChange('size', value)}
                         >
                           <SelectTrigger>
@@ -579,6 +687,86 @@ export default function EditLeadPage({ params }: EditLeadPageProps) {
                         />
                         {renderFieldErrors('linkedin')}
                       </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="registration_number">Registration Number</Label>
+                        <Input
+                          id="registration_number"
+                          name="registration_number"
+                          value={formData.registration_number || ''}
+                          onChange={(e) => handleInputChange(e)}
+                          placeholder="Enter registration number"
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="fax">Fax</Label>
+                        <Input
+                          id="fax"
+                          name="fax"
+                          value={formData.fax || ''}
+                          onChange={(e) => handleInputChange(e)}
+                          placeholder="Enter fax number"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Logo Upload */}
+                    <div className="space-y-2 mt-6">
+                      <Label htmlFor="logo" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                        Company Logo
+                      </Label>
+                      <div className="mt-1">
+                        <input
+                          type="file"
+                          id="logo"
+                          accept="image/*"
+                          onChange={handleLogoChange}
+                          className="hidden"
+                        />
+                        {logoPreview ? (
+                          <div className="relative inline-block">
+                            <div className="flex items-center gap-4 p-4 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg">
+                              <img
+                                src={logoPreview}
+                                alt="Logo preview"
+                                className="w-24 h-24 object-contain rounded"
+                              />
+                              <div className="flex-1">
+                                <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                                  {logoFile?.name || 'Current logo'}
+                                </p>
+                                {logoFile && (
+                                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                                    {(logoFile.size / 1024).toFixed(1)} KB
+                                  </p>
+                                )}
+                              </div>
+                              <Button
+                                type="button"
+                                variant="outline"
+                                onClick={removeLogo}
+                                className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20"
+                              >
+                                Remove
+                              </Button>
+                            </div>
+                          </div>
+                        ) : (
+                          <label
+                            htmlFor="logo"
+                            className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                          >
+                            <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                              <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">
+                                <span className="font-semibold">Click to upload logo</span>
+                              </p>
+                              <p className="text-xs text-gray-500 dark:text-gray-400">PNG, JPG, GIF up to 5MB</p>
+                            </div>
+                          </label>
+                        )}
+                      </div>
+                      {renderFieldErrors('logo')}
                     </div>
                   </div>
 
@@ -596,12 +784,14 @@ export default function EditLeadPage({ params }: EditLeadPageProps) {
                             <SelectValue placeholder="Select status" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="new">New</SelectItem>
+                            <SelectItem value="contacted">Contacted</SelectItem>
                             <SelectItem value="qualified">Qualified</SelectItem>
+                            <SelectItem value="proposal_sent">Proposal Sent</SelectItem>
                             <SelectItem value="negotiation">Negotiation</SelectItem>
-                            <SelectItem value="converted">Converted</SelectItem>
+                            <SelectItem value="won">Won</SelectItem>
                             <SelectItem value="lost">Lost</SelectItem>
                             <SelectItem value="on_hold">On Hold</SelectItem>
+                            <SelectItem value="converted">Converted</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
@@ -627,11 +817,20 @@ export default function EditLeadPage({ params }: EditLeadPageProps) {
                       <div className="space-y-2">
                         <Label htmlFor="source">Source</Label>
                         <Select
-                          value={formData.source || ''}
-                          onValueChange={(value) => handleDirectSelectChange('source', value)}
+                          value={formData.source || undefined}
+                          onValueChange={(value) => {
+                            console.log('Source selected:', value);
+                            handleDirectSelectChange('source', value);
+                          }}
                         >
                           <SelectTrigger>
-                            <SelectValue placeholder="Select source" />
+                            <SelectValue placeholder="Select source">
+                              {formData.source ? (
+                                formData.source.replace('_', ' ').split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
+                              ) : (
+                                'Select source'
+                              )}
+                            </SelectValue>
                           </SelectTrigger>
                           <SelectContent>
                             <SelectItem value="website">Website</SelectItem>
@@ -643,16 +842,26 @@ export default function EditLeadPage({ params }: EditLeadPageProps) {
                             <SelectItem value="other">Other</SelectItem>
                           </SelectContent>
                         </Select>
+                        <p className="text-xs text-gray-500">Current value: {formData.source || 'none'}</p>
                       </div>
 
                       <div className="space-y-2">
                         <Label htmlFor="assigned_to">Assigned To</Label>
                         <Select
-                          value={formData.assigned_to?.toString() || ''}
-                          onValueChange={(value) => handleDirectSelectChange('assigned_to', value ? parseInt(value) : null)}
+                          value={formData.assigned_to ? formData.assigned_to.toString() : undefined}
+                          onValueChange={(value) => {
+                            console.log('Employee selected:', value);
+                            handleDirectSelectChange('assigned_to', value ? parseInt(value) : null);
+                          }}
                         >
                           <SelectTrigger>
-                            <SelectValue placeholder="Select employee" />
+                            <SelectValue placeholder="Select employee">
+                              {formData.assigned_to && employees.length > 0 ? (
+                                employees.find((e: any) => e.id === formData.assigned_to)?.name || 'Unknown Employee'
+                              ) : (
+                                'Select employee'
+                              )}
+                            </SelectValue>
                           </SelectTrigger>
                           <SelectContent>
                             {employees.map((employee: any) => (
@@ -662,6 +871,7 @@ export default function EditLeadPage({ params }: EditLeadPageProps) {
                             ))}
                           </SelectContent>
                         </Select>
+                        <p className="text-xs text-gray-500">Current value: {formData.assigned_to || 'none'} | Available employees: {employees.length}</p>
                       </div>
                     </div>
 

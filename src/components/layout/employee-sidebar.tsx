@@ -10,6 +10,9 @@ import {
   MeetingsIcon,
   PdaDocumentsIcon,
   CustomersIcon,
+  UserPlusIcon,
+  FileTextIcon,
+  OffersIcon,
 } from '@/components/ui/icons';
 
 interface EmployeeSidebarProps {
@@ -22,10 +25,13 @@ interface EmployeeSidebarProps {
 export function EmployeeSidebar({ isCollapsed, onToggle, onPageChange, activePage = 'dashboard' }: EmployeeSidebarProps) {
   // Main menu items for employees
   const mainMenuItems = [
-    { id: 'dashboard', label: 'لوحة التحكم', icon: HomeIcon },
-    { id: 'my-tasks', label: 'مهامي', icon: PdaDocumentsIcon },
-    { id: 'my-meetings', label: 'اجتماعاتي', icon: MeetingsIcon },
-    { id: 'my-clients', label: 'عملائي', icon: CustomersIcon },
+    { id: 'dashboard', label: 'Dashboard', icon: HomeIcon },
+    { id: 'my-tasks', label: 'My Tasks', icon: PdaDocumentsIcon },
+    { id: 'my-meetings', label: 'My Meetings', icon: MeetingsIcon },
+    { id: 'my-clients', label: 'My Clients', icon: CustomersIcon },
+    { id: 'my-leads', label: 'Leads', icon: UserPlusIcon },
+    { id: 'my-contracts', label: 'Contracts', icon: FileTextIcon },
+    { id: 'my-quotations', label: 'Quotations', icon: OffersIcon },
   ];
 
   return (

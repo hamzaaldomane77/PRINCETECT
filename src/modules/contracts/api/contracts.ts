@@ -103,4 +103,9 @@ export class ContractsApi {
   static async deleteContractService(contractId: number, serviceId: number): Promise<{ success: boolean; message: string }> {
     return await apiClient.delete<{ success: boolean; message: string }>(`${this.baseUrl}/${contractId}/services/${serviceId}`);
   }
+
+  // Get Contract Tasks (Read-only)
+  static async getContractTasks(contractId: number): Promise<any> {
+    return await apiClient.get<any>(`${this.baseUrl}/${contractId}/tasks`);
+  }
 }

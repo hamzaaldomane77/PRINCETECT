@@ -21,7 +21,7 @@ export default function EmployeeLoginForm() {
 
   useEffect(() => {
     if (isAuthenticated && user) {
-      toast.success(`مرحباً ${user.full_name}! تم تسجيل الدخول بنجاح`);
+      toast.success(`Welcome ${user.full_name}! Logged in successfully`);
       
       // Redirect to employee dashboard after a short delay
       setTimeout(() => {
@@ -34,7 +34,7 @@ export default function EmployeeLoginForm() {
     e.preventDefault();
     setError('');
     
-    const loadingToast = toast.loading('جاري تسجيل الدخول...');
+    const loadingToast = toast.loading('Logging in...');
     
     try {
       await login(credentials);
@@ -47,7 +47,7 @@ export default function EmployeeLoginForm() {
         setError(err.message);
         toast.error(err.message);
       } else {
-        const errorMessage = 'حدث خطأ غير متوقع، يرجى المحاولة مرة أخرى';
+        const errorMessage = 'An unexpected error occurred, please try again';
         setError(errorMessage);
         toast.error(errorMessage);
       }
@@ -103,10 +103,10 @@ export default function EmployeeLoginForm() {
                 className="mx-auto mb-4"
               />
               <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-                تسجيل دخول الموظفين
+                Employee Login
               </h1>
               <p className="text-gray-600 dark:text-gray-400 mt-2">
-                أدخل بياناتك للوصول لنظام الموظفين
+                Enter your credentials to access the employee system
               </p>
             </div>
 
@@ -123,7 +123,7 @@ export default function EmployeeLoginForm() {
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>
                 <Label htmlFor="email" className="text-gray-700 dark:text-gray-300">
-                  البريد الإلكتروني
+                  Email
                 </Label>
                 <input
                   id="email"
@@ -131,7 +131,7 @@ export default function EmployeeLoginForm() {
                   value={credentials.email}
                   onChange={(e) => handleInputChange('email', e.target.value)}
                   className="mt-1 w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:text-white"
-                  placeholder="أدخل بريدك الإلكتروني"
+                  placeholder="Enter your email"
                   required
                   disabled={isLoading}
                 />
@@ -139,7 +139,7 @@ export default function EmployeeLoginForm() {
 
               <div>
                 <Label htmlFor="password" className="text-gray-700 dark:text-gray-300">
-                  كلمة المرور
+                  Password
                 </Label>
                 <div className="relative">
                   <input
@@ -148,7 +148,7 @@ export default function EmployeeLoginForm() {
                     value={credentials.password}
                     onChange={(e) => handleInputChange('password', e.target.value)}
                     className="mt-1 w-full px-3 py-2 pr-10 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:text-white"
-                    placeholder="أدخل كلمة المرور"
+                    placeholder="Enter your password"
                     required
                     disabled={isLoading}
                   />
@@ -172,7 +172,7 @@ export default function EmployeeLoginForm() {
                 className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 disabled={isLoading}
               >
-                {isLoading ? 'جاري تسجيل الدخول...' : 'تسجيل الدخول'}
+                {isLoading ? 'Logging in...' : 'Login'}
               </Button>
             </form>
 

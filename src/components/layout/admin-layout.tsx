@@ -48,6 +48,11 @@ export function AdminLayout({ children }: AdminLayoutProps) {
         } else {
           pageId = route;
         }
+        
+        // Special handling for tasks routes
+        if (pathname.includes('/tasks')) {
+          pageId = 'tasks';
+        }
       }
     }
     
@@ -101,6 +106,9 @@ export function AdminLayout({ children }: AdminLayoutProps) {
         break;
       case 'workflow':
         router.push('/super-admin/services-management/workflow');
+        break;
+      case 'tasks':
+        router.push('/super-admin/services-management/tasks');
         break;
       case 'pda-documents':
         router.push('/super-admin/pda-documents');

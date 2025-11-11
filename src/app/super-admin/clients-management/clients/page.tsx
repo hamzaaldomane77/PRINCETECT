@@ -7,7 +7,6 @@ import { AdminLayout } from '@/components/layout/admin-layout';
 import { Breadcrumb } from '@/components/ui/breadcrumb';
 import { DataTable, Column, ActionButton } from '@/components/ui/data-table';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { EyeIcon, EditIcon, TrashIcon, PlusIcon, RefreshIcon } from '@/components/ui/icons';
 import { 
   AlertDialog,
@@ -132,9 +131,27 @@ export default function CustomersPage() {
     { key: 'phone', label: 'Phone', type: 'text', align: 'right' },
     { key: 'mobile', label: 'Mobile', type: 'text', align: 'right' },
     { key: 'city', label: 'City', type: 'text', align: 'center' },
-    { key: 'industry', label: 'Industry', type: 'text', align: 'center' },
-    { key: 'size', label: 'Size', type: 'text', align: 'center' },
-    { key: 'status', label: 'Status', type: 'text', align: 'center' },
+    { 
+      key: 'industry', 
+      label: 'Industry', 
+      type: 'badge', 
+      align: 'center',
+      badgeColors: industryColors
+    },
+    { 
+      key: 'size', 
+      label: 'Size', 
+      type: 'badge', 
+      align: 'center',
+      badgeColors: sizeColors
+    },
+    { 
+      key: 'status', 
+      label: 'Status', 
+      type: 'badge', 
+      align: 'center',
+      badgeColors: statusColors
+    },
     { key: 'is_active', label: 'Active', type: 'icon', align: 'center' },
     { key: 'created_at', label: 'Created At', type: 'date', align: 'right' },
     { key: 'actions', label: 'Actions', type: 'actions', align: 'center' }
@@ -185,29 +202,21 @@ export default function CustomersPage() {
 
   // Transform clients data for the table
   const transformedClients = clients.map(client => ({
-    ...client,
+    id: client.id,
     logo: getImageUrl(client.logo, '/placeholder-logo.svg'),
-    city: client.city?.name || 'N/A',
-    industry: client.industry ? (
-      <Badge className={industryColors[client.industry] || industryColors.other}>
-        {client.industry.charAt(0).toUpperCase() + client.industry.slice(1)}
-      </Badge>
-    ) : 'N/A',
-    size: client.size ? (
-      <Badge className={sizeColors[client.size] || sizeColors.small}>
-        {client.size.charAt(0).toUpperCase() + client.size.slice(1)}
-      </Badge>
-    ) : 'N/A',
-    status: (
-      <Badge className={statusColors[client.status] || statusColors.inactive}>
-        {client.status.charAt(0).toUpperCase() + client.status.slice(1)}
-      </Badge>
-    ),
+    name: client.name,
     company_name: client.company_name || 'N/A',
     contact_person: client.contact_person || 'N/A',
+    email: client.email || 'N/A',
     phone: client.phone || 'N/A',
     mobile: client.mobile || 'N/A',
-    created_at: client.created_at, // Let DataTable format it
+    city: client.city?.name || 'N/A',
+    // Return simple string values for badges - DataTable will handle badge rendering
+    industry: client.industry || 'other',
+    size: client.size || 'small',
+    status: client.status || 'inactive',
+    is_active: client.is_active,
+    created_at: client.created_at,
   }));
 
   // Error display component

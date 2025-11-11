@@ -75,7 +75,8 @@ export function Sidebar({ isCollapsed, onToggle, onPageChange, activePage = 'das
   const servicesItems = [
     { id: 'service-categories', label: 'Service Categories', icon: ServiceCategoriesIcon },
     { id: 'services', label: 'Services', icon: ServicesIcon },
-    { id: 'workflow', label: 'Workflow', icon: WorkflowIcon }
+    { id: 'workflow', label: 'Workflow', icon: WorkflowIcon },
+    { id: 'tasks', label: 'Tasks', icon: WorkflowIcon }
   ];
 
   return (

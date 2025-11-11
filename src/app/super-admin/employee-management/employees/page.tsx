@@ -7,7 +7,6 @@ import { AdminLayout } from '@/components/layout/admin-layout';
 import { Breadcrumb } from '@/components/ui/breadcrumb';
 import { DataTable, Column, ActionButton } from '@/components/ui/data-table';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { EyeIcon, EditIcon, TrashIcon, PlusIcon, RefreshIcon } from '@/components/ui/icons';
 import { 
   AlertDialog,
@@ -96,58 +95,29 @@ export default function EmployeesPage() {
     }
   };
 
-  // Function to get status badge color
-  const getStatusBadgeColor = (status: string) => {
-    switch (status) {
-      case 'active':
-        return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300';
-      case 'inactive':
-        return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300';
-      default:
-        return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300';
-    }
+  // Badge colors
+  const statusColors = {
+    active: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300',
+    inactive: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300'
   };
 
-  // Function to get gender badge color
-  const getGenderBadgeColor = (gender: string) => {
-    switch (gender) {
-      case 'male':
-        return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300';
-      case 'female':
-        return 'bg-pink-100 text-pink-800 dark:bg-pink-900 dark:text-pink-300';
-      default:
-        return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300';
-    }
-  };
-
-  // Function to format date with day, month, year
-  const formatDate = (dateString: string) => {
-    if (!dateString) return 'N/A';
-    
-    try {
-      const date = new Date(dateString);
-      return date.toLocaleDateString('en-GB', {
-        day: '2-digit',
-        month: '2-digit', 
-        year: 'numeric'
-      });
-    } catch (error) {
-      return 'Invalid Date';
-    }
+  const genderColors = {
+    male: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300',
+    female: 'bg-pink-100 text-pink-800 dark:bg-pink-900 dark:text-pink-300'
   };
 
   // Define table columns
   const columns: Column[] = [
     { key: 'id', label: 'ID', type: 'text', width: '60px' },
-    { key: 'avatar', label: 'Photo', type: 'text', width: '80px', align: 'center' },
+    { key: 'avatar', label: 'Photo', type: 'custom', width: '80px', align: 'center', render: (employee: any) => <EmployeeAvatar employee={employee} /> },
     { key: 'employee_id', label: 'Employee ID', type: 'text', align: 'center' },
     { key: 'name', label: 'Full Name', type: 'text', align: 'right' },
     { key: 'job_title', label: 'Job Title', type: 'text', align: 'center' },
     { key: 'department', label: 'Department', type: 'text', align: 'center' },
     { key: 'work_email', label: 'Work Email', type: 'text', align: 'center' },
     { key: 'work_mobile', label: 'Mobile', type: 'text', align: 'center' },
-    { key: 'gender', label: 'Gender', type: 'text', align: 'center' },
-    { key: 'status', label: 'Status', type: 'text', align: 'center' },
+    { key: 'gender', label: 'Gender', type: 'badge', align: 'center', badgeColors: genderColors },
+    { key: 'status', label: 'Status', type: 'badge', align: 'center', badgeColors: statusColors },
     { key: 'hire_date', label: 'Hire Date', type: 'date', align: 'right' },
     { key: 'created_at', label: 'Created At', type: 'date', align: 'right' },
     { key: 'actions', label: 'Actions', type: 'actions', align: 'center' }
@@ -246,22 +216,18 @@ export default function EmployeesPage() {
 
   // Transform employees data for the table
   const transformedEmployees = employees.map(employee => ({
-    ...employee,
-    avatar: <EmployeeAvatar employee={employee} />,
+    id: employee.id,
+    avatar: employee, // Pass the whole employee for the custom render
+    employee_id: employee.employee_id,
+    name: employee.name,
     job_title: employee.job_title?.name || 'N/A',
     department: employee.department?.name || 'N/A',
-    gender: (
-      <Badge className={getGenderBadgeColor(employee.gender)}>
-        {employee.gender === 'male' ? 'Male' : 'Female'}
-      </Badge>
-    ),
-    status: (
-      <Badge className={getStatusBadgeColor(employee.status)}>
-        {employee.status === 'active' ? 'Active' : 'Inactive'}
-      </Badge>
-    ),
-    hire_date: formatDate(employee.hire_date),
-    created_at: formatDate(employee.created_at),
+    work_email: employee.work_email || 'N/A',
+    work_mobile: employee.work_mobile || 'N/A',
+    gender: employee.gender, // Return simple string value
+    status: employee.status, // Return simple string value
+    hire_date: employee.hire_date, // Let DataTable handle date formatting
+    created_at: employee.created_at, // Let DataTable handle date formatting
   }));
 
   // Error display component

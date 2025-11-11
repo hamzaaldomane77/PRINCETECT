@@ -33,6 +33,12 @@ export function EmployeeLayout({ children }: EmployeeLayoutProps) {
         pageId = 'my-meetings';
       } else if (pathname.includes('/my-clients')) {
         pageId = 'my-clients';
+      } else if (pathname.includes('/my-leads')) {
+        pageId = 'my-leads';
+      } else if (pathname.includes('/my-contracts')) {
+        pageId = 'my-contracts';
+      } else if (pathname.includes('/my-quotations')) {
+        pageId = 'my-quotations';
       } else {
         pageId = route;
       }
@@ -56,6 +62,15 @@ export function EmployeeLayout({ children }: EmployeeLayoutProps) {
       case 'my-clients':
         router.push('/employee/my-clients');
         break;
+      case 'my-leads':
+        router.push('/employee/my-leads');
+        break;
+      case 'my-contracts':
+        router.push('/employee/my-contracts');
+        break;
+      case 'my-quotations':
+        router.push('/employee/my-quotations');
+        break;
       default:
         router.push('/employee/dashboard');
     }
@@ -75,7 +90,7 @@ export function EmployeeLayout({ children }: EmployeeLayoutProps) {
       <div className="min-h-screen bg-gray-100 dark:bg-gray-900 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-500 mx-auto mb-4"></div>
-          <p className="text-gray-600 dark:text-gray-400">جاري التحميل...</p>
+          <p className="text-gray-600 dark:text-gray-400">Loading...</p>
         </div>
       </div>
     );
@@ -87,7 +102,7 @@ export function EmployeeLayout({ children }: EmployeeLayoutProps) {
       <div className="min-h-screen bg-gray-100 dark:bg-gray-900 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-500 mx-auto mb-4"></div>
-          <p className="text-gray-600 dark:text-gray-400">جاري إعادة التوجيه لصفحة تسجيل الدخول...</p>
+          <p className="text-gray-600 dark:text-gray-400">Redirecting to login page...</p>
         </div>
       </div>
     );
@@ -106,7 +121,7 @@ export function EmployeeLayout({ children }: EmployeeLayoutProps) {
         <div className="flex-1 flex flex-col h-full overflow-hidden">
           <EmployeeHeader />
           
-          <main className="flex-1 overflow-auto">
+          <main className="flex-1 overflow-auto bg-gray-100 dark:bg-gray-900">
             {children}
           </main>
         </div>

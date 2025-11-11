@@ -7,7 +7,6 @@ import { AdminLayout } from '@/components/layout/admin-layout';
 import { Breadcrumb } from '@/components/ui/breadcrumb';
 import { DataTable, Column, ActionButton } from '@/components/ui/data-table';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { EyeIcon, EditIcon, TrashIcon, PlusIcon, RefreshIcon, FileTextIcon, CheckCircleIcon, CalendarIcon, XIcon, MoreVerticalIcon } from '@/components/ui/icons';
 import { 
   AlertDialog,
@@ -19,12 +18,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 import { useMeetings, useDeleteMeeting } from '@/modules/meetings';
 import { Meeting } from '@/modules/meetings/types';
 import { toast } from 'sonner';
@@ -243,9 +236,27 @@ export default function MeetingsPage() {
     { key: 'duration_minutes', label: 'Duration', type: 'text', align: 'center' },
     { key: 'location', label: 'Location', type: 'text', align: 'right' },
     { key: 'assigned_employee_name', label: 'Assigned To', type: 'text', align: 'right' },
-    { key: 'status', label: 'Status', type: 'text', align: 'center' },
-    { key: 'meeting_type', label: 'Type', type: 'text', align: 'center' },
-    { key: 'category', label: 'Category', type: 'text', align: 'center' },
+    { 
+      key: 'status', 
+      label: 'Status', 
+      type: 'badge', 
+      align: 'center',
+      badgeColors: statusColors
+    },
+    { 
+      key: 'meeting_type', 
+      label: 'Type', 
+      type: 'badge', 
+      align: 'center',
+      badgeColors: typeColors
+    },
+    { 
+      key: 'category', 
+      label: 'Category', 
+      type: 'badge', 
+      align: 'center',
+      badgeColors: categoryColors
+    },
     { key: 'created_at', label: 'Created At', type: 'date', align: 'right' },
     { key: 'actions', label: 'Actions', type: 'actions', align: 'center' }
   ];
@@ -338,29 +349,20 @@ export default function MeetingsPage() {
 
   // Transform meetings data for the table
   const transformedMeetings = (meetings || []).map(meeting => ({
-    ...meeting,
+    id: meeting.id,
     logo: meeting.lead?.logo || meeting.client?.logo || '/placeholder-logo.svg',
+    title: meeting.title,
     client_name: meeting.lead?.name || meeting.client?.name || 'N/A',
-    meeting_date: meeting.meeting_date, // Let DataTable format it if column type is 'date', otherwise keep as string
+    meeting_date: meeting.meeting_date,
     meeting_time: formatTime(meeting.meeting_time),
     duration_minutes: `${meeting.duration_minutes} min`,
+    location: meeting.location || 'N/A',
     assigned_employee_name: meeting.assigned_employee?.name || 'N/A',
-    status: (
-      <Badge className={statusColors[meeting.status] || statusColors.scheduled}>
-        {meeting.status.charAt(0).toUpperCase() + meeting.status.slice(1)}
-      </Badge>
-    ),
-    meeting_type: (
-      <Badge className={typeColors[meeting.meeting_type] || typeColors.in_person}>
-        {meeting.meeting_type.replace('_', ' ').charAt(0).toUpperCase() + meeting.meeting_type.replace('_', ' ').slice(1)}
-      </Badge>
-    ),
-    category: (
-      <Badge className={categoryColors[meeting.category] || categoryColors.lead}>
-        {meeting.category.charAt(0).toUpperCase() + meeting.category.slice(1)}
-      </Badge>
-    ),
-    created_at: meeting.created_at, // Let DataTable format it
+    // Return simple string values for badges - DataTable will handle badge rendering
+    status: meeting.status,
+    meeting_type: meeting.meeting_type,
+    category: meeting.category,
+    created_at: meeting.created_at,
   }));
 
   // Error display component

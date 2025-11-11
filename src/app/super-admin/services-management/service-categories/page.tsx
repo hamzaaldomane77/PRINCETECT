@@ -137,9 +137,12 @@ export default function ServiceCategoriesPage() {
 
   // Transform categories data for the table
   const transformedCategories = categories.map(category => ({
-    ...category,
+    id: category.id,
+    name: category.name,
+    code: category.code,
     description: category.description || 'No description',
-    created_at: new Date(category.created_at).toLocaleDateString('ar-SA'),
+    is_active: category.is_active,
+    created_at: category.created_at, // Let DataTable handle date formatting
   }));
 
   // Error display component

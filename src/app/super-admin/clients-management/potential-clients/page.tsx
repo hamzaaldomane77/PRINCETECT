@@ -7,7 +7,6 @@ import { AdminLayout } from '@/components/layout/admin-layout';
 import { Breadcrumb } from '@/components/ui/breadcrumb';
 import { DataTable, Column, ActionButton } from '@/components/ui/data-table';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { EyeIcon, EditIcon, TrashIcon, PlusIcon, RefreshIcon, UserCheckIcon } from '@/components/ui/icons';
 import { 
   AlertDialog,
@@ -171,14 +170,62 @@ export default function PotentialClientsPage() {
   // Define table columns
   const columns: Column[] = [
     { key: 'id', label: 'ID', type: 'text', width: '60px' },
-    { key: 'logo', label: 'Lead', type: 'text', align: 'right' },
+    { 
+      key: 'logo', 
+      label: 'Lead', 
+      type: 'custom', 
+      align: 'right',
+      render: (lead: any) => (
+        <div className="flex items-center space-x-3">
+          <img 
+            src={getImageUrl(lead.logo_url)} 
+            alt={`${lead.name} logo`}
+            className="w-8 h-8 object-contain rounded"
+            onError={(e) => {
+              const target = e.target as HTMLImageElement;
+              target.src = '/placeholder-logo.svg';
+            }}
+          />
+          <div>
+            <p className="font-medium text-gray-900 dark:text-white">{lead.name}</p>
+            {lead.company_name && !lead.company_name.startsWith('http') && (
+              <p className="text-sm text-gray-500 dark:text-gray-400">{lead.company_name}</p>
+            )}
+          </div>
+        </div>
+      )
+    },
     { key: 'company_name', label: 'Company', type: 'text', align: 'right' },
     { key: 'email', label: 'Email', type: 'text', align: 'right' },
     { key: 'phone', label: 'Phone', type: 'text', align: 'center' },
-    { key: 'status', label: 'Status', type: 'text', align: 'center' },
-    { key: 'priority', label: 'Priority', type: 'text', align: 'center' },
-    { key: 'source', label: 'Source', type: 'text', align: 'center' },
-    { key: 'industry', label: 'Industry', type: 'text', align: 'center' },
+    { 
+      key: 'status', 
+      label: 'Status', 
+      type: 'badge', 
+      align: 'center',
+      badgeColors: statusColors
+    },
+    { 
+      key: 'priority', 
+      label: 'Priority', 
+      type: 'badge', 
+      align: 'center',
+      badgeColors: priorityColors
+    },
+    { 
+      key: 'source', 
+      label: 'Source', 
+      type: 'badge', 
+      align: 'center',
+      badgeColors: sourceColors
+    },
+    { 
+      key: 'industry', 
+      label: 'Industry', 
+      type: 'badge', 
+      align: 'center',
+      badgeColors: industryColors
+    },
     { key: 'assigned_to', label: 'Assigned To', type: 'text', align: 'center' },
     { key: 'city', label: 'City', type: 'text', align: 'center' },
     { key: 'created_at', label: 'Created At', type: 'date', align: 'right' },
@@ -237,52 +284,21 @@ export default function PotentialClientsPage() {
 
   // Transform leads data for the table
   const transformedLeads = leads.map(lead => ({
-    ...lead,
-    logo: (
-      <div className="flex items-center space-x-3">
-        <img 
-          src={getImageUrl(lead.logo)} 
-          alt={`${lead.name} logo`}
-          className="w-8 h-8 object-contain rounded"
-          onError={(e) => {
-            const target = e.target as HTMLImageElement;
-            target.src = '/placeholder-logo.svg';
-          }}
-        />
-        <div>
-          <p className="font-medium text-gray-900 dark:text-white">{lead.name}</p>
-          {lead.company_name && !lead.company_name.startsWith('http') && (
-            <p className="text-sm text-gray-500 dark:text-gray-400">{lead.company_name}</p>
-          )}
-        </div>
-      </div>
-    ),
+    id: lead.id,
+    // Store logo URL and name for custom render
+    logo_url: lead.logo,
+    name: lead.name,
     company_name: lead.company_name && !lead.company_name.startsWith('http') ? lead.company_name : '-',
     email: lead.email,
     phone: lead.phone || lead.mobile || '-',
-    status: (
-      <Badge className={statusColors[lead.status] || statusColors.contacted}>
-        {lead.status?.replace('_', ' ').toUpperCase() || 'CONTACTED'}
-      </Badge>
-    ),
-    priority: (
-      <Badge className={priorityColors[lead.priority] || priorityColors.medium}>
-        {lead.priority?.toUpperCase() || 'MEDIUM'}
-      </Badge>
-    ),
-    source: lead.source ? (
-      <Badge className={sourceColors[lead.source] || sourceColors.other}>
-        {lead.source.replace('_', ' ').toUpperCase()}
-      </Badge>
-    ) : '-',
-    industry: lead.industry ? (
-      <Badge className={industryColors[lead.industry] || industryColors.other}>
-        {lead.industry.toUpperCase()}
-      </Badge>
-    ) : '-',
+    // Return simple string values for badges - DataTable will handle badge rendering
+    status: lead.status || 'contacted',
+    priority: lead.priority || 'medium',
+    source: lead.source || 'other',
+    industry: lead.industry || 'other',
     assigned_to: lead.assigned_employee ? lead.assigned_employee.name : 'Unassigned',
     city: lead.city?.name || '-',
-    created_at: lead.created_at, // Let DataTable format it
+    created_at: lead.created_at,
   }));
 
   // Error display component

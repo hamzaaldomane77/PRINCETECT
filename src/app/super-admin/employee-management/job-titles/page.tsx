@@ -7,7 +7,6 @@ import { AdminLayout } from '@/components/layout/admin-layout';
 import { Breadcrumb } from '@/components/ui/breadcrumb';
 import { DataTable, Column, ActionButton } from '@/components/ui/data-table';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { EyeIcon, EditIcon, TrashIcon, PlusIcon, RefreshIcon } from '@/components/ui/icons';
 import { 
   AlertDialog,
@@ -95,20 +94,12 @@ export default function JobTitlesPage() {
     }
   };
 
-  // Function to get level badge color
-  const getLevelBadgeColor = (level: string) => {
-    switch (level) {
-      case 'junior':
-        return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300';
-      case 'senior':
-        return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300';
-      case 'manager':
-        return 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300';
-      case 'director':
-        return 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300';
-      default:
-        return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300';
-    }
+  // Badge colors
+  const levelColors = {
+    junior: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300',
+    senior: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300',
+    manager: 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300',
+    director: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300'
   };
 
   // Define table columns
@@ -117,7 +108,7 @@ export default function JobTitlesPage() {
     { key: 'name', label: 'Job Title Name', type: 'text', align: 'right' },
     { key: 'code', label: 'Code', type: 'text', align: 'center' },
     { key: 'department', label: 'Department', type: 'text', align: 'center' },
-    { key: 'level', label: 'Level', type: 'text', align: 'center' },
+    { key: 'level', label: 'Level', type: 'badge', align: 'center', badgeColors: levelColors },
     { key: 'description', label: 'Description', type: 'text', align: 'right' },
     { key: 'is_active', label: 'Active', type: 'icon', align: 'center' },
     { key: 'created_at', label: 'Created At', type: 'date', align: 'right' },
@@ -168,39 +159,18 @@ export default function JobTitlesPage() {
     // TODO: Implement filter functionality
   };
 
-  // Function to format date with day, month, year
-  const formatDate = (dateString: string) => {
-    if (!dateString) return 'N/A';
-    
-    try {
-      const date = new Date(dateString);
-      return date.toLocaleDateString('en-GB', {
-        day: '2-digit',
-        month: '2-digit', 
-        year: 'numeric'
-      });
-    } catch (error) {
-      return 'Invalid Date';
-    }
-  };
-
   // Transform job titles data for the table
   const transformedJobTitles = jobTitles.map(jobTitle => ({
-    ...jobTitle,
+    id: jobTitle.id,
+    name: jobTitle.name,
+    code: jobTitle.code,
     department: jobTitle.department?.name || 'N/A',
-    level: (
-      <Badge className={getLevelBadgeColor(jobTitle.level)}>
-        {jobTitle.level === 'junior' ? 'Junior' :
-         jobTitle.level === 'senior' ? 'Senior' :
-         jobTitle.level === 'manager' ? 'Manager' :
-         jobTitle.level === 'director' ? 'Director' :
-         jobTitle.level}
-      </Badge>
-    ),
+    level: jobTitle.level, // Return simple string value
     description: jobTitle.description.length > 50 ? 
       `${jobTitle.description.substring(0, 50)}...` : jobTitle.description,
-    created_at: formatDate(jobTitle.created_at),
-    updated_at: formatDate(jobTitle.updated_at),
+    is_active: jobTitle.is_active,
+    created_at: jobTitle.created_at, // Let DataTable handle date formatting
+    updated_at: jobTitle.updated_at, // Let DataTable handle date formatting
   }));
 
   // Error display component

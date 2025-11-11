@@ -7,7 +7,6 @@ import { AdminLayout } from '@/components/layout/admin-layout';
 import { Breadcrumb } from '@/components/ui/breadcrumb';
 import { DataTable, Column, ActionButton } from '@/components/ui/data-table';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { EyeIcon, EditIcon, TrashIcon, PlusIcon, RefreshIcon } from '@/components/ui/icons';
 import { 
   AlertDialog,
@@ -150,31 +149,17 @@ export default function EmployeeTypesPage() {
     // TODO: Implement filter functionality
   };
 
-  // Function to format date with day, month, year
-  const formatDate = (dateString: string) => {
-    if (!dateString) return 'N/A';
-    
-    try {
-      const date = new Date(dateString);
-      return date.toLocaleDateString('en-GB', {
-        day: '2-digit',
-        month: '2-digit', 
-        year: 'numeric'
-      });
-    } catch (error) {
-      return 'Invalid Date';
-    }
-  };
-
   // Transform employee types data for the table
   const transformedEmployeeTypes = employeeTypes.map(employeeType => ({
-    ...employeeType,
+    id: employeeType.id,
+    name: employeeType.name,
+    code: employeeType.code,
     description: employeeType.description && employeeType.description.length > 50 ? 
       `${employeeType.description.substring(0, 50)}...` : employeeType.description || 'N/A',
     notes: employeeType.notes && employeeType.notes.length > 30 ? 
       `${employeeType.notes.substring(0, 30)}...` : employeeType.notes || 'N/A',
-    created_at: formatDate(employeeType.created_at),
-    updated_at: formatDate(employeeType.updated_at),
+    created_at: employeeType.created_at, // Let DataTable handle date formatting
+    updated_at: employeeType.updated_at, // Let DataTable handle date formatting
   }));
 
   // Error display component
