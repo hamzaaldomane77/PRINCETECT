@@ -139,7 +139,13 @@ export default function PdaDocumentsPage() {
     { key: 'contract_title', label: 'Contract Title', type: 'text', align: 'right' },
     { key: 'customer_name', label: 'Customer', type: 'text', align: 'right' },
     { key: 'created_by_name', label: 'Created By', type: 'text', align: 'right' },
-    { key: 'status', label: 'Status', type: 'text', align: 'center' },
+    { 
+      key: 'status', 
+      label: 'Status', 
+      type: 'badge', 
+      align: 'center',
+      badgeColors: statusColors
+    },
     { key: 'notes', label: 'Notes', type: 'text', align: 'right' },
     { key: 'created_at', label: 'Created At', type: 'text', align: 'right' },
     { key: 'actions', label: 'Actions', type: 'actions', align: 'center' }
@@ -258,11 +264,7 @@ export default function PdaDocumentsPage() {
     contract_title: doc.contract?.title || 'N/A',
     customer_name: doc.customer_id || 'N/A',
     created_by_name: doc.created_by?.name || 'N/A',
-    status: (
-      <Badge className={statusColors[doc.status] || statusColors.draft}>
-        {doc.status.charAt(0).toUpperCase() + doc.status.slice(1)}
-      </Badge>
-    ),
+    status: doc.status ? doc.status.charAt(0).toUpperCase() + doc.status.slice(1) : 'N/A',
     notes: doc.notes || 'N/A',
     created_at: formatDate(doc.created_at),
   }));

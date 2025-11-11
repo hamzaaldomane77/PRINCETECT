@@ -7,7 +7,6 @@ import { AdminLayout } from '@/components/layout/admin-layout';
 import { Breadcrumb } from '@/components/ui/breadcrumb';
 import { DataTable, Column, ActionButton } from '@/components/ui/data-table';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { EyeIcon, EditIcon, TrashIcon, PlusIcon, RefreshIcon, MoreVerticalIcon } from '@/components/ui/icons';
 import { 
   AlertDialog,
@@ -89,10 +88,40 @@ export default function MarketingMixesPage() {
   // Define table columns
   const columns: Column[] = [
     { key: 'id', label: 'ID', type: 'text', width: '60px' },
-    { key: 'element', label: 'Element', type: 'text', align: 'center' },
+    { 
+      key: 'element', 
+      label: 'Element', 
+      type: 'badge', 
+      align: 'center',
+      badgeColors: elementColors
+    },
     { key: 'title', label: 'Title', type: 'text', align: 'left' },
-    { key: 'description', label: 'Description', type: 'text', align: 'left' },
-    { key: 'pda_document', label: 'PDA Document', type: 'text', align: 'left' },
+    { 
+      key: 'description', 
+      label: 'Description', 
+      type: 'custom',
+      align: 'left',
+      render: (item: any) => (
+        <span className="text-sm text-gray-600 dark:text-gray-400 truncate max-w-xs block">
+          {item.description || '-'}
+        </span>
+      )
+    },
+    { 
+      key: 'pda_document', 
+      label: 'PDA Document', 
+      type: 'custom',
+      align: 'left',
+      render: (item: any) => {
+        if (!item.pda_document) return '-';
+        return (
+          <div className="flex flex-col">
+            <span className="font-medium text-gray-900 dark:text-white">Document #{item.pda_document.id}</span>
+            <span className="text-sm text-gray-500 dark:text-gray-400">Status: {item.pda_document.status}</span>
+          </div>
+        );
+      }
+    },
     { key: 'created_at', label: 'Created At', type: 'date', align: 'right' },
     { key: 'actions', label: 'Actions', type: 'actions', align: 'center' }
   ];
@@ -147,22 +176,9 @@ export default function MarketingMixesPage() {
   // Transform marketing mixes data for the table
   const transformedMarketingMixes = marketingMixes.map(mix => ({
     ...mix,
-    element: (
-      <Badge className={elementColors[mix.element as keyof typeof elementColors] || elementColors.product}>
-        {mix.element.toUpperCase()}
-      </Badge>
-    ),
-    description: mix.description ? (
-      <span className="text-sm text-gray-600 dark:text-gray-400 truncate max-w-xs block">
-        {mix.description}
-      </span>
-    ) : '-',
-    pda_document: mix.pda_document ? (
-      <div className="flex flex-col">
-        <span className="font-medium text-gray-900 dark:text-white">Document #{mix.pda_document.id}</span>
-        <span className="text-sm text-gray-500 dark:text-gray-400">Status: {mix.pda_document.status}</span>
-      </div>
-    ) : '-',
+    element: mix.element ? mix.element.toLowerCase() : 'product',
+    description: mix.description || null,
+    pda_document: mix.pda_document || null,
     created_at: mix.created_at,
   }));
 

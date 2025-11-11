@@ -7,7 +7,6 @@ import { AdminLayout } from '@/components/layout/admin-layout';
 import { Breadcrumb } from '@/components/ui/breadcrumb';
 import { DataTable, Column, ActionButton } from '@/components/ui/data-table';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { EyeIcon, EditIcon, TrashIcon, PlusIcon, RefreshIcon, MoreVerticalIcon } from '@/components/ui/icons';
 import {
   AlertDialog,
@@ -107,11 +106,29 @@ export default function MarketingChannelsPage() {
     router.push(`/super-admin/marketing-channels/${channel.id}/influencers/create`);
   };
 
+  // Channel type colors
+  const channelTypeColors: Record<string, string> = {
+    online: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300',
+    offline: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300',
+    social_media: 'bg-pink-100 text-pink-800 dark:bg-pink-900 dark:text-pink-300',
+    email: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300',
+    sms: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300',
+    direct_mail: 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-300',
+    telemarketing: 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300',
+    other: 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300',
+  };
+
   // Define table columns
   const columns: Column[] = [
     { key: 'id', label: 'ID', type: 'text', width: '60px' },
     { key: 'name', label: 'Name', type: 'text', align: 'right' },
-    { key: 'channel_type', label: 'Channel Type', type: 'text', align: 'center' },
+    { 
+      key: 'channel_type', 
+      label: 'Channel Type', 
+      type: 'badge', 
+      align: 'center',
+      badgeColors: channelTypeColors
+    },
     { key: 'pda_document_id', label: 'PDA Document ID', type: 'text', align: 'right' },
     { key: 'details_count', label: 'Details Count', type: 'text', align: 'center' },
     { key: 'created_at', label: 'Created At', type: 'text', align: 'right' },
@@ -197,11 +214,9 @@ export default function MarketingChannelsPage() {
   // Transform channels data for the table
   const transformedChannels = channels.map(channel => ({
     ...channel,
-    channel_type: (
-      <Badge className="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300">
-        {channel.channel_type.charAt(0).toUpperCase() + channel.channel_type.slice(1).replace('_', ' ')}
-      </Badge>
-    ),
+    channel_type: channel.channel_type 
+      ? channel.channel_type.charAt(0).toUpperCase() + channel.channel_type.slice(1).replace(/_/g, ' ')
+      : 'N/A',
     pda_document_id: channel.pda_document_id || 'N/A',
     details_count: channel.details?.length || 0,
     created_at: formatDate(channel.created_at),
